@@ -1,0 +1,48 @@
+
+function math.wrap(x, a, b)
+    while x > b do x = x - (b-a+1) end
+    while x < a do x = x + (b-a+1) end
+    return x
+end
+
+function math.clamp(x, a, b)
+    if x > b then return b end
+    if x < a then return a end
+    return x
+end
+
+function math.isinrange(x, a, b)
+    if x > b then return false end
+    if x < a then return false end
+    return true
+end
+
+function table.shallow_copy(t)
+  local t2 = {}
+  for k,v in pairs(t) do
+    t2[k] = v
+  end
+  return t2
+end
+
+function table.shallow_copy_obj(t)
+  local t2 = {}
+  for k,v in pairs(t) do
+    t2[k] = v
+  end
+  setmetatable(t2, {__index = t})
+  return t2
+end
+
+function table.print(t)
+  for k, v in pairs(t) do
+    print(k, v)
+  end
+end
+
+function table.print2(t)
+  for k, v in pairs(t) do
+    print(k)
+    table.print(v)
+  end
+end
