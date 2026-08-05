@@ -20,7 +20,7 @@ function RandomBag:_regenerate()
         self[i] = i
     end
 
-    for i=PIECES_MAX, 2, -1 do
+    for i=PIECES_MAX,2,-1 do
         local j = love.math.random(i)
         self[i], self[j] = self[j], self[i]
     end

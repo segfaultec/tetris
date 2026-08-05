@@ -1,5 +1,5 @@
 
-Board = {}
+Board = {board={}}
 function Board:new(o)
     o = o or {
         board={}
@@ -11,20 +11,23 @@ function Board:new(o)
 end
 
 function Board:empty()
-    local t = self.board
-    for tileX=1,TETRIS_BOARD_COUNT_W do
-        if t[tileX] == nil then t[tileX] = {} end
-        for tileY=1,TETRIS_BOARD_COUNT_H do
-            t[tileX][tileY] = nil
-        end
+    for y=1,TETRIS_BOARD_COUNT_H do
+        self:emptyLine(y)
+    end
+end
+
+function Board:emptyLine(y)
+    if self.board[y] == nil then self.board[y] = {} end
+    for x=1,TETRIS_BOARD_COUNT_W do
+        self.board[y][x] = nil
     end
 end
 
 function Board:copyFrom(otherboard)
-    for x=1,TETRIS_BOARD_COUNT_W do
-        if self.board[x] == nil then self.board[x] = {} end
-        for y=1,TETRIS_BOARD_COUNT_H do
-            self.board[x][y] = otherboard.board[x][y]
+    for y=1,TETRIS_BOARD_COUNT_H do
+        if self.board[y] == nil then self.board[y] = {} end
+        for x=1,TETRIS_BOARD_COUNT_W do
+            self.board[y][x] = otherboard.board[y][x]
         end
     end
 end
@@ -32,9 +35,9 @@ end
 function Board:drawToSp(spBlocks)
     for tileX=1,TETRIS_BOARD_COUNT_W do
         for tileY=1,TETRIS_BOARD_COUNT_H do
-            local tile = self.board[tileX][tileY]
+            local tile = self.board[tileY][tileX]
             if tile ~= nil then
-                spBlocks:setColor(self.board[tileX][tileY])
+                spBlocks:setColor(self.board[tileY][tileX])
                 spBlocks:add((tileX-1) * TETRIS_PIECE_SIZE, (tileY-1) * TETRIS_PIECE_SIZE)
             end
         end
@@ -59,7 +62,7 @@ function Board:addPlayerPiece(state, tint)
             if bit.band(blocks[yo], bit.lshift(1, bx-xo)) ~= 0
                 and math.isinrange(x+xo-1, 1, TETRIS_BOARD_COUNT_W)
                 and math.isinrange(y+yo-1, 1, TETRIS_BOARD_COUNT_H) then
-                self.board[x+xo-1][y+yo-1] = colour
+                self.board[y+yo-1][x+xo-1] = colour
             end
         end
     end
@@ -77,7 +80,7 @@ function Board:isPieceValidSpot(state)
             if bit.band(blocks[yo], bit.lshift(1, bx-xo)) ~= 0 then
                 if math.isinrange(x+xo-1, 1, TETRIS_BOARD_COUNT_W)
                     and math.isinrange(y+yo-1, 1, TETRIS_BOARD_COUNT_H)
-                    and self.board[x+xo-1][y+yo-1] == nil then
+                    and self.board[y+yo-1][x+xo-1] == nil then
                         -- wow
                     else
                         -- placing pieces failed
@@ -88,4 +91,52 @@ function Board:isPieceValidSpot(state)
     end
 
     return true
+end
+
+function Board:isLineEmpty(y)
+    for x=1,TETRIS_BOARD_COUNT_W do
+        if self.board[y][x] ~= nil then
+            return false
+        end
+    end
+    return true
+end
+
+function Board:clearLines(ys)
+
+    for clearY in pairs(ys) do
+        self:emptyLine(clearY)
+    end
+
+    local emptyCount = 0
+    for y=TETRIS_BOARD_COUNT_H, 2, -1 do
+        if self:isLineEmpty(y) then
+            emptyCount = emptyCount + 1
+        else
+            if emptyCount > 0 then
+                self.board[y], self.board[y+emptyCount] = self.board[y+emptyCount], self.board[y]
+            end
+        end
+    end
+
+end
+
+function Board:checkLineClears()
+
+    local clears = {}
+    for y=1,TETRIS_BOARD_COUNT_H do
+        
+        local clear = true
+        for x=1,TETRIS_BOARD_COUNT_W do
+            if self.board[y][x] == nil then
+                clear = false
+                break
+            end
+        end
+
+        if clear then clears[y]=true end
+
+    end
+
+    return clears
 end

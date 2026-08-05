@@ -73,8 +73,17 @@ function Game:getHarddropState()
 end
 
 function Game:harddrop()
-    self.board:addPlayerPiece(self:getHarddropState(), 1)
+    self.state = self:getHarddropState()
+    self:placePiece()
+end
+
+function Game:placePiece()
+    self.board:addPlayerPiece(self.state, 1)
     self:resetPlayer()
+
+    local clears = self.board:checkLineClears()
+    self.board:clearLines(clears)
+
 end
 
 function Game:gravity()
@@ -99,8 +108,7 @@ function Game:gravity()
         if (self.cLockdelay == 0) then
             self.cLockdelay = F_LOCKDELAY
 
-            self.board:addPlayerPiece(self.state, 1)
-            self:resetPlayer()
+            self:placePiece()
             
         end
     end
@@ -218,6 +226,7 @@ function Game:draw()
     lg.setColor(WHITE)
     lg.print(string.format("id:%d r:%d", self.state.id, self.state.rot),10,10)
     lg.print(string.format("g:%d, l:%d", self.cGravity, self.cLockdelay), 10, 20)
+    lg.print(string.format("bag:%d", #self.bag), 10, 30)
     lg.pop() -- End debug draw
 
 end
