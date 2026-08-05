@@ -22,15 +22,7 @@ function table.shallow_copy(t)
   for k,v in pairs(t) do
     t2[k] = v
   end
-  return t2
-end
-
-function table.shallow_copy_obj(t)
-  local t2 = {}
-  for k,v in pairs(t) do
-    t2[k] = v
-  end
-  setmetatable(t2, {__index = t})
+  setmetatable(t2, getmetatable(t))
   return t2
 end
 

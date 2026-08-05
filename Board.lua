@@ -29,9 +29,7 @@ function Board:copyFrom(otherboard)
     end
 end
 
-function Board:draw(spBlocks)
-
-    spBlocks:clear()
+function Board:drawToSp(spBlocks)
     for tileX=1,TETRIS_BOARD_COUNT_W do
         for tileY=1,TETRIS_BOARD_COUNT_H do
             local tile = self.board[tileX][tileY]
@@ -41,8 +39,6 @@ function Board:draw(spBlocks)
             end
         end
     end
-    lg.draw(spBlocks)
-
 end
 
 function Board:addPlayerPiece(state)
@@ -55,7 +51,10 @@ function Board:addPlayerPiece(state)
 
     for yo=1,by do
         for xo=1,bx do
-            if bit.band(blocks[yo], bit.lshift(1, bx-xo)) ~= 0 then
+
+            if bit.band(blocks[yo], bit.lshift(1, bx-xo)) ~= 0
+                and math.isinrange(x+xo-1, 1, TETRIS_BOARD_COUNT_W)
+                and math.isinrange(y+yo-1, 1, TETRIS_BOARD_COUNT_H) then
                 self.board[x+xo-1][y+yo-1] = piece.colour
             end
         end

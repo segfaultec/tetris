@@ -40,10 +40,10 @@ GOLD   = {1, 0.6, 0.1}
 GRAY   = {0.5, 0.5, 0.5}
 GRAY_DARK = {.2,.2,.2}
 
-TIME_MOVEDOWN = .6
-
 TICKRATE = 60
 
-F_MOVEDOWN = 24
+F_GRAVITYDELAY = 48
+F_LOCKDELAY = 30
+LOCKMOVELIMIT = 15
 
 require "constants_pieces"

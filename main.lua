@@ -61,31 +61,7 @@ function love.draw()
     lg.setBackgroundColor(0,0,0,1)
     lg.setFont(Default_font)
 
-    lg.push("all") -- Start board
-
-    lg.setColor(GRAY_DARK)
-    lg.rectangle("fill", 0, 0, GAME_WIDTH, GAME_HEIGHT)
-
-    lg.setColor(GRAY)
-    lg.rectangle("fill", TETRIS_BOARD_X, TETRIS_BOARD_Y, TETRIS_BOARD_W, TETRIS_BOARD_H)
-
-    lg.setColor(BLACK)
-    lg.rectangle("line", TETRIS_BOARD_X, TETRIS_BOARD_Y, TETRIS_BOARD_W+1, TETRIS_BOARD_H+1)
-
-    lg.pop() -- End board
-
-    lg.push("all") -- Start blocks
-    
-    lg.translate(TETRIS_BOARD_X, TETRIS_BOARD_Y)
-
     game:draw()
-
-    lg.pop() -- End blocks
-
-    lg.push() -- Start debug draw
-    lg.setColor(WHITE)
-    lg.print(string.format("%d %d", game.state.id, game.state.rot),10,10)
-    lg.pop() -- End debug draw
 
     push:finish()
 end
