@@ -4,7 +4,6 @@ require "RandomBag"
 
 Game = {
     board = nil,
-    spBlocks = nil,
 
     cGravity = F_GRAVITYDELAY,
     cLockdelay = F_LOCKDELAY,
@@ -14,7 +13,8 @@ Game = {
         x = 4,
         y = 4,
         id = 3,
-        rot = 1
+        rot = 1,
+        hold = 0
     },
 
     bag = nil
@@ -39,9 +39,6 @@ function Game:new(o)
 end
 
 function Game:init()
-    local blockImg = lg.newImage("img/block6x6.png")
-    self.spBlocks = lg.newSpriteBatch(blockImg)
-
     self:resetPlayer()
 end
 
@@ -54,7 +51,7 @@ end
 function Game:resetPlayer()
     self.state.x = 3
     self.state.y = 0
-    self.state.id = self.bag:get()
+    self.state.id = self.bag:consume()
     self.state.rot = 1
 end
 
@@ -117,6 +114,7 @@ end
 function Game:keypressed(key)
 
     local newstate = nil
+    local consumeBag = false
 
     if key == "q" then
         newstate = table.shallow_copy(self.state)
@@ -141,10 +139,24 @@ function Game:keypressed(key)
     elseif key == "s" then
         newstate = table.shallow_copy(self.state)
         newstate.y = self.state.y + 1
+    elseif key == "space" then
+        newstate = table.shallow_copy(self.state)
+
+        if newstate.hold > 0 then
+            newstate.hold, newstate.id = newstate.id, newstate.hold
+        else
+            newstate.hold, newstate.id = newstate.id, self.bag:peek()
+            consumeBag = true
+        end
     end
 
     if newstate ~= nil and self:tryMovePiece(self.state, newstate) then
+
+        -- todo move limit?
+        self.cLockdelay = F_LOCKDELAY
         self.state = newstate
+
+        if consumeBag then self.bag:consume() end
     end
 end
 
@@ -192,6 +204,20 @@ function Game:tryMovePiece(old_state, inout_new_state)
     return false
 end
 
+sps = {}
+
+function initSp(sp, img)
+    if sps[sp] == nil then
+        sps[sp] = lg.newSpriteBatch(img)
+    else
+        sps[sp]:clear()
+    end
+
+    return sps[sp]
+end
+
+local drawPieceBox = require "drawPieceBox"
+
 function Game:draw()
 
     lg.push("all") -- Start board
@@ -207,8 +233,11 @@ function Game:draw()
 
     lg.pop() -- End board
 
-    lg.push("all") -- Start blocks
+    local spBoard = initSp("board", blockImg)
+    local spHold = initSp("hold", blockImg)
+    local spNext = initSp("next", blockImg)
 
+    lg.push("all") -- Start board
     lg.translate(TETRIS_BOARD_X, TETRIS_BOARD_Y)
 
     local drawBoard = Board:new()
@@ -216,17 +245,24 @@ function Game:draw()
     drawBoard:addPlayerPiece(self:getHarddropState(), .5)
     drawBoard:addPlayerPiece(self.state, 1)
 
-    self.spBlocks:clear()
-    drawBoard:drawToSp(self.spBlocks)
-    lg.draw(self.spBlocks)
+    drawBoard:drawToSp(spBoard)
+    lg.draw(spBoard)
 
-    lg.pop() -- End blocks
+    lg.pop() -- End board
+
+    lg.push("all") -- Start next&hold
+    lg.translate(10,10)
+    drawPieceBox(self.bag:peek(), "NEXT", spNext)
+    lg.translate(0,33)
+    drawPieceBox(self.state.hold, "HOLD", spHold)
+    lg.pop() -- End next&hold
 
     lg.push() -- Start debug draw
     lg.setColor(WHITE)
-    lg.print(string.format("id:%d r:%d", self.state.id, self.state.rot),10,10)
-    lg.print(string.format("g:%d, l:%d", self.cGravity, self.cLockdelay), 10, 20)
-    lg.print(string.format("bag:%d", #self.bag), 10, 30)
+    lg.translate(170,10)
+    lg.print(string.format("id:%d r:%d", self.state.id, self.state.rot),0,0)
+    lg.print(string.format("g:%d, l:%d", self.cGravity, self.cLockdelay), 0, 10)
+    lg.print(string.format("bag:%d", #self.bag), 0, 20)
     lg.pop() -- End debug draw
 
 end

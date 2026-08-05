@@ -6,6 +6,7 @@ game = nil
 function love.load()
     require "constants"
     require "utils"
+    require "images"
     require "Game"
 
     lw.setTitle("Tetris")

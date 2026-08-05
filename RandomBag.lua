@@ -5,14 +5,17 @@ function RandomBag:new()
     setmetatable(o, self)
     self.__index = self
 
-    o:_regenerate()
-
     return o
 end
 
-function RandomBag:get()
+function RandomBag:consume()
     if #self == 0 then self:_regenerate() end
-    return table.remove(self, #self)
+    return table.remove(self)
+end
+
+function RandomBag:peek()
+    if #self == 0 then self:_regenerate() end
+    return self[#self]
 end
 
 function RandomBag:_regenerate()
@@ -24,4 +27,10 @@ function RandomBag:_regenerate()
         local j = love.math.random(i)
         self[i], self[j] = self[j], self[i]
     end
+
+    str = ""
+    for i=1,PIECES_MAX do
+        str = str..self[i]
+    end
+    print(str)
 end

@@ -43,7 +43,7 @@ GRAY_DARK = {.2,.2,.2}
 TICKRATE = 60
 
 F_GRAVITYDELAY = 48
-F_LOCKDELAY = 30
+F_LOCKDELAY = 60
 LOCKMOVELIMIT = 15
 
 require "constants_pieces"

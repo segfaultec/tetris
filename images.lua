@@ -1,0 +1,1 @@
+blockImg = lg.newImage("img/block6x6.png")
