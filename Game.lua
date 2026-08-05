@@ -58,7 +58,7 @@ function Game:resetPlayer()
     self.state.rot = 1
 end
 
-function Game:harddrop()
+function Game:getHarddropState()
     local oldstate = table.shallow_copy(self.state)
     local newstate = table.shallow_copy(self.state)
     while true do
@@ -67,12 +67,14 @@ function Game:harddrop()
         if self:tryMovePiece(oldstate, newstate) then
             oldstate.y = newstate.y
         else
-            self.board:addPlayerPiece(oldstate)
-            self:resetPlayer()
-            break
+            return oldstate
         end
-
     end
+end
+
+function Game:harddrop()
+    self.board:addPlayerPiece(self:getHarddropState(), 1)
+    self:resetPlayer()
 end
 
 function Game:gravity()
@@ -97,7 +99,7 @@ function Game:gravity()
         if (self.cLockdelay == 0) then
             self.cLockdelay = F_LOCKDELAY
 
-            self.board:addPlayerPiece(self.state)
+            self.board:addPlayerPiece(self.state, 1)
             self:resetPlayer()
             
         end
@@ -114,12 +116,12 @@ function Game:keypressed(key)
     elseif key == "e" then
         newstate = table.shallow_copy(self.state)
         newstate.rot = math.wrap(self.state.rot + 1, 1, ROT_MAX)
-    elseif key == "r" then
-        newstate = table.shallow_copy(self.state)
-        newstate.id = math.wrap(self.state.id - 1, 1, PIECES_MAX)
-    elseif key == "t" then
-        newstate = table.shallow_copy(self.state)
-        newstate.id = math.wrap(self.state.id + 1, 1, PIECES_MAX)
+    -- elseif key == "r" then
+    --     newstate = table.shallow_copy(self.state)
+    --     newstate.id = math.wrap(self.state.id - 1, 1, PIECES_MAX)
+    -- elseif key == "t" then
+    --     newstate = table.shallow_copy(self.state)
+    --     newstate.id = math.wrap(self.state.id + 1, 1, PIECES_MAX)
     elseif key == "a" then
         newstate = table.shallow_copy(self.state)
         newstate.x = self.state.x - 1
@@ -198,18 +200,19 @@ function Game:draw()
     lg.pop() -- End board
 
     lg.push("all") -- Start blocks
-    
+
     lg.translate(TETRIS_BOARD_X, TETRIS_BOARD_Y)
-    
+
     local drawBoard = Board:new()
     drawBoard:copyFrom(self.board)
-    drawBoard:addPlayerPiece(self.state)
+    drawBoard:addPlayerPiece(self:getHarddropState(), .5)
+    drawBoard:addPlayerPiece(self.state, 1)
 
     self.spBlocks:clear()
     drawBoard:drawToSp(self.spBlocks)
     lg.draw(self.spBlocks)
 
-    lg.pop()
+    lg.pop() -- End blocks
 
     lg.push() -- Start debug draw
     lg.setColor(WHITE)

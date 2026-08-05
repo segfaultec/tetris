@@ -41,7 +41,7 @@ function Board:drawToSp(spBlocks)
     end
 end
 
-function Board:addPlayerPiece(state)
+function Board:addPlayerPiece(state, tint)
 
     local x, y = state.x, state.y
 
@@ -49,13 +49,17 @@ function Board:addPlayerPiece(state)
     local bx, by = piece.bounds[1], piece.bounds[2]
     local blocks = piece.rotations[state.rot]
 
+    local colour = table.shallow_copy(piece.colour)
+    for i=1,#colour do
+        colour[i] = colour[i] * tint
+    end
+
     for yo=1,by do
         for xo=1,bx do
-
             if bit.band(blocks[yo], bit.lshift(1, bx-xo)) ~= 0
                 and math.isinrange(x+xo-1, 1, TETRIS_BOARD_COUNT_W)
                 and math.isinrange(y+yo-1, 1, TETRIS_BOARD_COUNT_H) then
-                self.board[x+xo-1][y+yo-1] = piece.colour
+                self.board[x+xo-1][y+yo-1] = colour
             end
         end
     end
