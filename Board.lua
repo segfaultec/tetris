@@ -44,6 +44,29 @@ function Board:drawToSp(spBlocks)
     end
 end
 
+function Board:drawOutline()
+
+    lg.push("all")
+    lg.setColor(WHITE)
+
+    -- horizontal borders
+    for tileX=1,TETRIS_BOARD_COUNT_W do
+        for tileY=1,TETRIS_BOARD_COUNT_H do
+            if self.board[tileY][tileX] ~= nil then
+                lg.rectangle("fill",
+                    ((tileX-1) * TETRIS_PIECE_SIZE) - 1,
+                    ((tileY-1) * TETRIS_PIECE_SIZE) - 1,
+                    (TETRIS_PIECE_SIZE) + 2,
+                    (TETRIS_PIECE_SIZE) + 2
+                )
+            end
+        end
+    end
+
+    lg.pop()
+
+end
+
 function Board:addPlayerPiece(state, tint)
 
     local x, y = state.x, state.y

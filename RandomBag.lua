@@ -2,9 +2,7 @@ RandomBag = {}
 
 function RandomBag:new()
     local o = {}
-    setmetatable(o, self)
-    self.__index = self
-
+    setmetatable(o, {__index = RandomBag})
     return o
 end
 

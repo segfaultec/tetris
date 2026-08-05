@@ -19,7 +19,9 @@ Game = {
     hold = 0,
     canHold = true,
 
-    bag = nil
+    bag = nil,
+
+    debugPause = false
 }
 
 local Game_meta = {__index = Game}
@@ -45,7 +47,9 @@ function Game:init()
 end
 
 function Game:tick()
-    
+
+    if self.debugPause then return end
+
     self:gravity()
 
 end
@@ -155,6 +159,8 @@ function Game:keypressed(key)
         self.canHold = false
 
         return
+    elseif key == "p" then
+        self.debugPause = not self.debugPause
     end
 
     if newstate ~= nil and self:tryMovePiece(self.state, newstate) then
@@ -232,9 +238,6 @@ function Game:draw()
     lg.setColor(GRAY)
     lg.rectangle("fill", TETRIS_BOARD_X, TETRIS_BOARD_Y, TETRIS_BOARD_W, TETRIS_BOARD_H)
 
-    lg.setColor(BLACK)
-    lg.rectangle("line", TETRIS_BOARD_X, TETRIS_BOARD_Y, TETRIS_BOARD_W+1, TETRIS_BOARD_H+1)
-
     lg.pop() -- End board
 
     local spBoard = initSp("board", blockImg)
@@ -244,12 +247,18 @@ function Game:draw()
     lg.push("all") -- Start board
     lg.translate(TETRIS_BOARD_X, TETRIS_BOARD_Y)
 
-    local drawBoard = Board:new()
-    drawBoard:copyFrom(self.board)
-    drawBoard:addPlayerPiece(self:getHarddropState(), .5)
-    drawBoard:addPlayerPiece(self.state, 1)
+    spBoard:clear()
+    local playerDrawBoard = Board:new()
+    playerDrawBoard:empty()
+    playerDrawBoard:addPlayerPiece(self:getHarddropState(), .5)
+    playerDrawBoard:addPlayerPiece(self.state, 1)
+    playerDrawBoard:drawToSp(spBoard)
+    lg.draw(spBoard)
 
-    drawBoard:drawToSp(spBoard)
+    self.board:drawOutline()
+
+    spBoard:clear()
+    self.board:drawToSp(spBoard)
     lg.draw(spBoard)
 
     lg.pop() -- End board
@@ -263,6 +272,13 @@ function Game:draw()
     drawPieceBox(self.hold, "HOLD", spHold, tint)
     lg.pop() -- End next&hold
 
+    lg.push("all") -- Start board border
+
+    lg.setColor(BLACK)
+    lg.rectangle("line", TETRIS_BOARD_X, TETRIS_BOARD_Y, TETRIS_BOARD_W+1, TETRIS_BOARD_H+1)
+
+    lg.pop()
+
     lg.push() -- Start debug draw
     lg.setColor(WHITE)
     lg.translate(170,10)
@@ -270,5 +286,6 @@ function Game:draw()
     lg.print(string.format("g:%d, l:%d", self.cGravity, self.cLockdelay), 0, 10)
     lg.print(string.format("bag:%d", #self.bag), 0, 20)
     lg.pop() -- End debug draw
+
 
 end
