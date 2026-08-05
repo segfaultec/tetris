@@ -14,8 +14,10 @@ Game = {
         y = 4,
         id = 3,
         rot = 1,
-        hold = 0
     },
+
+    hold = 0,
+    canHold = true,
 
     bag = nil
 }
@@ -39,7 +41,7 @@ function Game:new(o)
 end
 
 function Game:init()
-    self:resetPlayer()
+    self:resetPlayer(self.bag:consume())
 end
 
 function Game:tick()
@@ -48,10 +50,10 @@ function Game:tick()
 
 end
 
-function Game:resetPlayer()
+function Game:resetPlayer(newpid)
     self.state.x = 3
     self.state.y = 0
-    self.state.id = self.bag:consume()
+    self.state.id = newpid
     self.state.rot = 1
 end
 
@@ -76,7 +78,9 @@ end
 
 function Game:placePiece()
     self.board:addPlayerPiece(self.state, 1)
-    self:resetPlayer()
+    self:resetPlayer(self.bag:consume())
+
+    self.canHold = true
 
     local clears = self.board:checkLineClears()
     self.board:clearLines(clears)
@@ -114,7 +118,6 @@ end
 function Game:keypressed(key)
 
     local newstate = nil
-    local consumeBag = false
 
     if key == "q" then
         newstate = table.shallow_copy(self.state)
@@ -139,15 +142,19 @@ function Game:keypressed(key)
     elseif key == "s" then
         newstate = table.shallow_copy(self.state)
         newstate.y = self.state.y + 1
-    elseif key == "space" then
-        newstate = table.shallow_copy(self.state)
+    elseif self.canHold and key == "space" then
 
-        if newstate.hold > 0 then
-            newstate.hold, newstate.id = newstate.id, newstate.hold
+        local oldhold = self.hold
+        self.hold = self.state.id
+        if oldhold > 0 then
+            self:resetPlayer(oldhold)
         else
-            newstate.hold, newstate.id = newstate.id, self.bag:peek()
-            consumeBag = true
+            self:resetPlayer(self.bag:consume())
         end
+
+        self.canHold = false
+
+        return
     end
 
     if newstate ~= nil and self:tryMovePiece(self.state, newstate) then
@@ -155,8 +162,6 @@ function Game:keypressed(key)
         -- todo move limit?
         self.cLockdelay = F_LOCKDELAY
         self.state = newstate
-
-        if consumeBag then self.bag:consume() end
     end
 end
 
@@ -205,7 +210,6 @@ function Game:tryMovePiece(old_state, inout_new_state)
 end
 
 sps = {}
-
 function initSp(sp, img)
     if sps[sp] == nil then
         sps[sp] = lg.newSpriteBatch(img)
@@ -252,9 +256,11 @@ function Game:draw()
 
     lg.push("all") -- Start next&hold
     lg.translate(10,10)
-    drawPieceBox(self.bag:peek(), "NEXT", spNext)
-    lg.translate(0,33)
-    drawPieceBox(self.state.hold, "HOLD", spHold)
+    drawPieceBox(self.bag:peek(), "NEXT", spNext, 1)
+    lg.translate(33,0)
+    local tint = 1
+    if not self.canHold then tint = .5 end
+    drawPieceBox(self.hold, "HOLD", spHold, tint)
     lg.pop() -- End next&hold
 
     lg.push() -- Start debug draw
