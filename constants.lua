@@ -46,4 +46,9 @@ F_GRAVITYDELAY = 48
 F_LOCKDELAY = 30 + F_GRAVITYDELAY
 LOCKMOVELIMIT = 15
 
+REPEAT_KEYS = {["a"]=true, ["d"]=true, ["s"]=true}
+REPEAT_KEYS_CLASHES = {["a"]="d", ["d"]="a"}
+F_REPEAT_DELAY = 14
+F_REPEAT_RATE = 3
+
 require "constants_pieces"
