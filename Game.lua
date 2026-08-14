@@ -6,13 +6,11 @@ require "Anim"
 local drawPiece = require "drawPiece"
 
 ---@class Game
----@field board Board | nil
----@field bag RandomBag | nil
+---@field board Board
+---@field bag RandomBag
 ---@field anim Anim | nil
----@field animflags AnimFlags | nil
+---@field animflags AnimFlags
 Game = {
-    board = nil,
-
     cGravity = F_GRAVITYDELAY,
     cLockdelay = F_LOCKDELAY,
     cLockMoveLimit = LOCKMOVELIMIT,
@@ -27,12 +25,9 @@ Game = {
     hold = 0,
     canHold = true,
 
-    bag = nil,
-
     debugPause = false,
 
-    anim = nil,
-    animflags = nil
+    anim = nil
 }
 
 function Game:construct(o)
@@ -42,7 +37,6 @@ function Game:construct(o)
     o.board:empty()
 
     o.bag = construct(RandomBag)
-
     o.animflags = construct(AnimFlags)
 end
 
@@ -54,7 +48,19 @@ function Game:tick()
 
     if self.debugPause then return end
 
-    self:gravity()
+    if self.anim == nil then
+
+        -- No animation: regular game tick
+
+        self:gravity()
+    else
+
+        -- Play the animation
+        if self.anim:tick(self.animflags) then
+            self.anim = nil
+        end
+
+    end    
 
 end
 
@@ -91,7 +97,12 @@ function Game:placePiece()
     self.canHold = true
 
     local clears = self.board:checkLineClears()
-    self.board:clearLines(clears)
+    if #clears > 0 then
+        self.anim = construct(Anim_Lineclear)
+        self.anim.callback = function ()
+            self.board:clearLines(clears)
+        end
+    end
 
 end
 
@@ -248,24 +259,26 @@ function Game:draw()
     lg.push("all") -- Start board
     lg.translate(TETRIS_BOARD_X, TETRIS_BOARD_Y)
 
-    lg.push("transform") -- Start player
-    lg.translate((self.state.x-1) * TETRIS_PIECE_SIZE, (self.state.y-1) * TETRIS_PIECE_SIZE)
-    local playerClip = nil
-    if self.state.y == 0 then
-        playerClip = {u=2}
-    end
-    drawPiece(self.state.id, self.state.rot, initSp("player", blockImg), 1, playerClip)
-    lg.pop() -- End player 
+    if self.animflags.drawplayer then
+        lg.push("transform") -- Start player
+        lg.translate((self.state.x-1) * TETRIS_PIECE_SIZE, (self.state.y-1) * TETRIS_PIECE_SIZE)
+        local playerClip = nil
+        if self.state.y == 0 then
+            playerClip = {u=2}
+        end
+        drawPiece(self.state.id, self.state.rot, initSp("player", blockImg), 1, playerClip)
+        lg.pop() -- End player
 
-    lg.push("transform") -- Start harddrop
-    local harddrop = self:getHarddropState()
-    lg.translate((harddrop.x-1) * TETRIS_PIECE_SIZE, (harddrop.y-1) * TETRIS_PIECE_SIZE)
-    local playerClip = nil
-    if harddrop.y == 0 then
-        playerClip = {u=2}
+        lg.push("transform") -- Start harddrop
+        local harddrop = self:getHarddropState()
+        lg.translate((harddrop.x-1) * TETRIS_PIECE_SIZE, (harddrop.y-1) * TETRIS_PIECE_SIZE)
+        local playerClip = nil
+        if harddrop.y == 0 then
+            playerClip = {u=2}
+        end
+        drawPiece(harddrop.id, harddrop.rot, initSp("harddrop", blockImg), .5, playerClip)
+        lg.pop() -- End harddrop
     end
-    drawPiece(harddrop.id, harddrop.rot, initSp("harddrop", blockImg), .5, playerClip)
-    lg.pop() -- End harddrop
 
     self.board:drawOutline()
 
@@ -297,6 +310,7 @@ function Game:draw()
     lg.print(string.format("id:%d r:%d", self.state.id, self.state.rot),0,0)
     lg.print(string.format("g:%d, l:%d", self.cGravity, self.cLockdelay), 0, 10)
     lg.print(string.format("bag:%d", #self.bag), 0, 20)
+    lg.print(string.format("anim:%s", bool2str(self.anim)), 0, 30)
     lg.pop() -- End debug draw
 
 

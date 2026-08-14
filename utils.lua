@@ -45,3 +45,7 @@ function construct(class, obj)
   if class.construct ~= nil then class:construct(obj) end
   return obj
 end
+
+function bool2str(bool)
+  if bool then return "true" else return "false" end
+end

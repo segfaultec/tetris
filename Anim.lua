@@ -11,26 +11,26 @@ function AnimFlags:new(o)
 end
 
 ---@class Anim
----@field flags AnimFlags | nil
-local Anim = {flags = nil}
+---@field callback function | nil
+local Anim = { _started = false, _finished = false }
 
-function Anim:new(o)
-    o = o or {}
-    setmetatable(o, {__index = self})
-    return o
-end
+function Anim:tick(flags)
 
-function Anim:init(flags)
-    self.flags = flags
-    self:_start(self.flags)
-end
-
-function Anim:tick()
-    if self:_tick(self.flags) then
-        self:_finish(self.flags)
-        return true
+    if not self._started then
+        self:_start(flags)
+        self._started = true
     end
-    return false
+
+    if not self._finished then
+        if self:_tick(flags) then
+            self:_finish(flags)
+            self._finished = true
+
+            if self.callback then self.callback() end
+        end
+    end
+
+    return self._finished
 end
 
 ---@param flags AnimFlags
@@ -48,19 +48,13 @@ function Anim:_finish(flags)
 
 end
 
-local F_ANIM_LINECLEAR_DURATION = 30
+local F_ANIM_LINECLEAR_DURATION = 60*5
 
 ---@class Anim_Lineclear : Anim
 Anim_Lineclear = {
     duration = 0
 }
 setmetatable(Anim_Lineclear, {__index=Anim})
-
-function Anim_Lineclear:new(o)
-    o = o or {}
-    setmetatable(o, {__index = self})
-    return o
-end
 
 function Anim_Lineclear:_start(flags)
     flags.drawplayer = false

@@ -119,8 +119,8 @@ end
 
 function Board:clearLines(ys)
 
-    for clearY in pairs(ys) do
-        self:emptyLine(clearY)
+    for i=1,#ys do
+        self:emptyLine(ys[i])
     end
 
     local emptyCount = 0
@@ -149,7 +149,7 @@ function Board:checkLineClears()
             end
         end
 
-        if clear then clears[y]=true end
+        if clear then table.insert(clears, y) end
 
     end
 

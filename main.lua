@@ -47,6 +47,13 @@ repeat_keys = {}
 
 function love.keypressed(key)
 
+    if key == "end" then
+        game = construct(Game)
+        game:init()
+        return
+    end
+
+
     if REPEAT_KEYS[key] then
         repeat_keys[key] = 0
     end
