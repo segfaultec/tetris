@@ -4,14 +4,14 @@ Board = {}
 
 function Board:empty()
     for y=1,TETRIS_BOARD_COUNT_H do
-        self:emptyLine(y)
+        self:setLine(y, nil)
     end
 end
 
-function Board:emptyLine(y)
+function Board:setLine(y, value)
     if self[y] == nil then self[y] = {} end
     for x=1,TETRIS_BOARD_COUNT_W do
-        self[y][x] = nil
+        self[y][x] = value
     end
 end
 
@@ -19,7 +19,7 @@ function Board:copyFrom(otherboard)
     for y=1,TETRIS_BOARD_COUNT_H do
         if self[y] == nil then self[y] = {} end
         for x=1,TETRIS_BOARD_COUNT_W do
-            self[y][x] = otherboard.board[y][x]
+            self[y][x] = otherboard[y][x]
         end
     end
 end
@@ -119,9 +119,7 @@ end
 
 function Board:clearLines(ys)
 
-    for i=1,#ys do
-        self:emptyLine(ys[i])
-    end
+    self:fillLines(ys, nil)
 
     local emptyCount = 0
     for y=TETRIS_BOARD_COUNT_H, 2, -1 do
@@ -134,6 +132,12 @@ function Board:clearLines(ys)
         end
     end
 
+end
+
+function Board:fillLines(ys, value)
+    for i=1,#ys do
+        self:setLine(ys[i], value)
+    end
 end
 
 function Board:checkLineClears()

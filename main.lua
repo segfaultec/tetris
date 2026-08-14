@@ -86,7 +86,6 @@ end
 
 function love.update(dt)
     Timer.update(dt)
-    game:tick()
 end
 
 function love.draw()

@@ -1,19 +1,18 @@
 
 ---@class AnimFlags
+---@field midclearlines_col table
 AnimFlags = {
     drawplayer = true
 }
-
-function AnimFlags:new(o)
-    o = o or {}
-    setmetatable(o, {__index = self})
-    return o
+function AnimFlags:construct(o)
+    o.midclearlines_col = {1,1,1}
 end
 
 ---@class Anim
 ---@field callback function | nil
-local Anim = { _started = false, _finished = false }
+local Anim = { _started = false, _finished = false, _t = 0 }
 
+---@param flags AnimFlags
 function Anim:tick(flags)
 
     if not self._started then
@@ -22,11 +21,13 @@ function Anim:tick(flags)
     end
 
     if not self._finished then
-        if self:_tick(flags) then
+        if self:_tick(flags, self._t) then
             self:_finish(flags)
             self._finished = true
 
             if self.callback then self.callback() end
+        else 
+            self._t = self._t + 1
         end
     end
 
@@ -39,7 +40,7 @@ function Anim:_start(flags)
 end
 
 ---@param flags AnimFlags
-function Anim:_tick(flags)
+function Anim:_tick(flags, t)
     return true
 end
 
@@ -48,7 +49,7 @@ function Anim:_finish(flags)
 
 end
 
-local F_ANIM_LINECLEAR_DURATION = 60*5
+local F_ANIM_LINECLEAR_DURATION = TICKRATE*1
 
 ---@class Anim_Lineclear : Anim
 Anim_Lineclear = {
@@ -61,13 +62,19 @@ function Anim_Lineclear:_start(flags)
 end
 
 ---@return boolean Done
-function Anim_Lineclear:_tick(flags)
+function Anim_Lineclear:_tick(flags, t)
 
-    self.duration = self.duration + 1
+    local x = math.abs(math.sin(t * 0.1))
+
+    flags.midclearlines_col[1] = x
+    flags.midclearlines_col[2] = x
+    flags.midclearlines_col[3] = x
 
     if self.duration == F_ANIM_LINECLEAR_DURATION then
         return true
     end
+
+    self.duration = self.duration + 1
 
     return false
 

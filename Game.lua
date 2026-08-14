@@ -27,7 +27,9 @@ Game = {
 
     debugPause = false,
 
-    anim = nil
+    anim = nil,
+
+    midclearlines = nil
 }
 
 function Game:construct(o)
@@ -98,9 +100,12 @@ function Game:placePiece()
 
     local clears = self.board:checkLineClears()
     if #clears > 0 then
+        self.midclearlines = clears
         self.anim = construct(Anim_Lineclear)
+
         self.anim.callback = function ()
-            self.board:clearLines(clears)
+            self.board:clearLines(self.midclearlines)
+            self.midclearlines = nil
         end
     end
 
@@ -260,14 +265,6 @@ function Game:draw()
     lg.translate(TETRIS_BOARD_X, TETRIS_BOARD_Y)
 
     if self.animflags.drawplayer then
-        lg.push("transform") -- Start player
-        lg.translate((self.state.x-1) * TETRIS_PIECE_SIZE, (self.state.y-1) * TETRIS_PIECE_SIZE)
-        local playerClip = nil
-        if self.state.y == 0 then
-            playerClip = {u=2}
-        end
-        drawPiece(self.state.id, self.state.rot, initSp("player", blockImg), 1, playerClip)
-        lg.pop() -- End player
 
         lg.push("transform") -- Start harddrop
         local harddrop = self:getHarddropState()
@@ -278,12 +275,31 @@ function Game:draw()
         end
         drawPiece(harddrop.id, harddrop.rot, initSp("harddrop", blockImg), .5, playerClip)
         lg.pop() -- End harddrop
+
+        lg.push("transform") -- Start player
+        lg.translate((self.state.x-1) * TETRIS_PIECE_SIZE, (self.state.y-1) * TETRIS_PIECE_SIZE)
+        local playerClip = nil
+        if self.state.y == 0 then
+            playerClip = {u=2}
+        end
+        drawPiece(self.state.id, self.state.rot, initSp("player", blockImg), 1, playerClip)
+        lg.pop() -- End player
     end
 
     self.board:drawOutline()
 
-    local spBoard = initSp("board", blockImg)
-    self.board:drawToSp(spBoard)
+    -- todo make better
+    local drawBoard = construct(Board)
+    drawBoard:copyFrom(self.board)
+
+    if self.midclearlines then
+        drawBoard:fillLines(self.midclearlines, self.animflags.midclearlines_col)
+    end
+
+    local spBoard = initSp("board", blockImg);
+
+    drawBoard:drawToSp(spBoard)
+
     lg.draw(spBoard)
 
     lg.pop() -- End board
@@ -310,7 +326,9 @@ function Game:draw()
     lg.print(string.format("id:%d r:%d", self.state.id, self.state.rot),0,0)
     lg.print(string.format("g:%d, l:%d", self.cGravity, self.cLockdelay), 0, 10)
     lg.print(string.format("bag:%d", #self.bag), 0, 20)
-    lg.print(string.format("anim:%s", bool2str(self.anim)), 0, 30)
+    if self.anim then
+    lg.print(string.format("anim:%s", self.anim.duration), 0, 30)
+    end
     lg.pop() -- End debug draw
 
 

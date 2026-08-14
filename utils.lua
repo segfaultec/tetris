@@ -39,9 +39,14 @@ function table.print2(t)
   end
 end
 
+---@generic T
+---@param class T
+---@param obj T | nil
+---@return T
 function construct(class, obj)
   obj = obj or {}
   setmetatable(obj, {__index = class})
+---@diagnostic disable-next-line: undefined-field
   if class.construct ~= nil then class:construct(obj) end
   return obj
 end
