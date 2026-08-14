@@ -1,4 +1,5 @@
 
+---@class Board
 Board = {board={}}
 function Board:new(o)
     o = o or {

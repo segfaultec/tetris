@@ -1,8 +1,14 @@
 
 require "Board"
 require "RandomBag"
+require "Anim"
+
 local drawPiece = require "drawPiece"
 
+---@class Game
+---@field board Board | nil
+---@field bag RandomBag | nil
+---@field anim Anim | nil
 Game = {
     board = nil,
 
@@ -22,18 +28,18 @@ Game = {
 
     bag = nil,
 
-    debugPause = false
-}
+    debugPause = false,
 
-local Game_meta = {__index = Game}
-local Game_state_meta = {__index = Game.state}
+    anim = nil,
+    animflags = construct(AnimFlags)
+}
 
 function Game:new(o)
     o = o or {}
     o.state = o.state or {}
 
-    setmetatable(o, Game_meta)
-    setmetatable(o.state, Game_state_meta)
+    setmetatable(o, {__index = self})
+    setmetatable(o.state, {__index = self.state})
 
     self.board = Board:new()
     self.board:empty()
@@ -149,7 +155,7 @@ function Game:keypressed(key)
     elseif key == "s" then
         newstate = table.shallow_copy(self.state)
         newstate.y = self.state.y + 1
-        self.cLockdelay = 0
+        --self.cLockdelay = 0
     elseif self.canHold and key == "space" then
 
         local oldhold = self.hold

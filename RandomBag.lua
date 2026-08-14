@@ -1,3 +1,4 @@
+---@class RandomBag
 RandomBag = {}
 
 function RandomBag:new()

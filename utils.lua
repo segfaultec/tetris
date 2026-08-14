@@ -38,3 +38,9 @@ function table.print2(t)
     table.print(v)
   end
 end
+
+function construct(class)
+  local o = {}
+  setmetatable(o, {__index = class})
+  return o
+end
