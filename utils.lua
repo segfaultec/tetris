@@ -39,8 +39,9 @@ function table.print2(t)
   end
 end
 
-function construct(class)
-  local o = {}
-  setmetatable(o, {__index = class})
-  return o
+function construct(class, obj)
+  obj = obj or {}
+  setmetatable(obj, {__index = class})
+  if class.construct ~= nil then class:construct(obj) end
+  return obj
 end

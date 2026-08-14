@@ -32,7 +32,7 @@ function love.load()
 
     Default_font = lg.newFont("fonts/NESCyrillic.ttf", 16)
 
-    game = Game:new()
+    game = construct(Game)
     game:init()
 
     Timer.every(1/TICKRATE, fixedTick)

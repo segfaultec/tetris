@@ -9,6 +9,7 @@ local drawPiece = require "drawPiece"
 ---@field board Board | nil
 ---@field bag RandomBag | nil
 ---@field anim Anim | nil
+---@field animflags AnimFlags | nil
 Game = {
     board = nil,
 
@@ -31,22 +32,18 @@ Game = {
     debugPause = false,
 
     anim = nil,
-    animflags = construct(AnimFlags)
+    animflags = nil
 }
 
-function Game:new(o)
-    o = o or {}
-    o.state = o.state or {}
-
-    setmetatable(o, {__index = self})
+function Game:construct(o)
     setmetatable(o.state, {__index = self.state})
 
-    self.board = Board:new()
-    self.board:empty()
+    o.board = construct(Board)
+    o.board:empty()
 
-    self.bag = RandomBag:new()
+    o.bag = construct(RandomBag)
 
-    return o
+    o.animflags = construct(AnimFlags)
 end
 
 function Game:init()
@@ -62,7 +59,7 @@ function Game:tick()
 end
 
 function Game:resetPlayer(newpid)
-    self.state.x = 3
+    self.state.x = 4
     self.state.y = 0
     self.state.id = newpid
     self.state.rot = 1

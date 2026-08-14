@@ -1,12 +1,6 @@
 ---@class RandomBag
 RandomBag = {}
 
-function RandomBag:new()
-    local o = {}
-    setmetatable(o, {__index = RandomBag})
-    return o
-end
-
 function RandomBag:consume()
     if #self == 0 then self:_regenerate() end
     return table.remove(self)
