@@ -1,6 +1,7 @@
 
 require "Board"
 require "RandomBag"
+local drawPiece = require "drawPiece"
 
 Game = {
     board = nil,
@@ -99,22 +100,24 @@ function Game:gravity()
 
         self.cLockdelay = F_LOCKDELAY
 
-        self.cGravity = self.cGravity - 1
+        
         if (self.cGravity == 0) then
             self.cGravity = F_MOVEDOWN
 
             -- Apply movedown
             self.state = newstate
+        else
+            self.cGravity = self.cGravity - 1
         end
     else
         self.cGravity = F_GRAVITYDELAY
 
-        self.cLockdelay = self.cLockdelay - 1
         if (self.cLockdelay == 0) then
             self.cLockdelay = F_LOCKDELAY
 
             self:placePiece()
-            
+        else
+            self.cLockdelay = self.cLockdelay - 1
         end
     end
 end
@@ -146,6 +149,7 @@ function Game:keypressed(key)
     elseif key == "s" then
         newstate = table.shallow_copy(self.state)
         newstate.y = self.state.y + 1
+        self.cLockdelay = 0
     elseif self.canHold and key == "space" then
 
         local oldhold = self.hold
@@ -164,8 +168,6 @@ function Game:keypressed(key)
     end
 
     if newstate ~= nil and self:tryMovePiece(self.state, newstate) then
-
-        -- todo move limit?
         self.cLockdelay = F_LOCKDELAY
         self.state = newstate
     end
@@ -240,24 +242,31 @@ function Game:draw()
 
     lg.pop() -- End board
 
-    local spBoard = initSp("board", blockImg)
-    local spHold = initSp("hold", blockImg)
-    local spNext = initSp("next", blockImg)
-
     lg.push("all") -- Start board
     lg.translate(TETRIS_BOARD_X, TETRIS_BOARD_Y)
 
-    spBoard:clear()
-    local playerDrawBoard = Board:new()
-    playerDrawBoard:empty()
-    playerDrawBoard:addPlayerPiece(self:getHarddropState(), .5)
-    playerDrawBoard:addPlayerPiece(self.state, 1)
-    playerDrawBoard:drawToSp(spBoard)
-    lg.draw(spBoard)
+    lg.push("transform") -- Start player
+    lg.translate((self.state.x-1) * TETRIS_PIECE_SIZE, (self.state.y-1) * TETRIS_PIECE_SIZE)
+    local playerClip = nil
+    if self.state.y == 0 then
+        playerClip = {u=2}
+    end
+    drawPiece(self.state.id, self.state.rot, initSp("player", blockImg), 1, playerClip)
+    lg.pop() -- End player 
+
+    lg.push("transform") -- Start harddrop
+    local harddrop = self:getHarddropState()
+    lg.translate((harddrop.x-1) * TETRIS_PIECE_SIZE, (harddrop.y-1) * TETRIS_PIECE_SIZE)
+    local playerClip = nil
+    if harddrop.y == 0 then
+        playerClip = {u=2}
+    end
+    drawPiece(harddrop.id, harddrop.rot, initSp("harddrop", blockImg), .5, playerClip)
+    lg.pop() -- End harddrop
 
     self.board:drawOutline()
 
-    spBoard:clear()
+    local spBoard = initSp("board", blockImg)
     self.board:drawToSp(spBoard)
     lg.draw(spBoard)
 
@@ -265,11 +274,11 @@ function Game:draw()
 
     lg.push("all") -- Start next&hold
     lg.translate(10,10)
-    drawPieceBox(self.bag:peek(), "NEXT", spNext, 1)
+    drawPieceBox(self.bag:peek(), "NEXT", initSp("next", blockImg), 1)
     lg.translate(33,0)
     local tint = 1
     if not self.canHold then tint = .5 end
-    drawPieceBox(self.hold, "HOLD", spHold, tint)
+    drawPieceBox(self.hold, "HOLD", initSp("hold", blockImg), tint)
     lg.pop() -- End next&hold
 
     lg.push("all") -- Start board border
