@@ -1,13 +1,15 @@
+require "constants"
+require "utils"
+require "images"
+
 local push = require "lib.push"
 local Timer = require "lib.hump.timer"
+local Game = require "Game"
+local ParticleTest = require "ParticleTest"
 
 game = nil
 
 function love.load()
-    require "constants"
-    require "utils"
-    require "images"
-    require "Game"
 
     lw.setTitle("Tetris")
     lg.setDefaultFilter("nearest", "nearest", 0)
@@ -47,12 +49,15 @@ repeat_keys = {}
 
 function love.keypressed(key)
 
-    if key == "end" then
+    if key == "kp1" then
         game = construct(Game)
         game:init()
         return
+    elseif key == "kp2" then
+        game = construct(ParticleTest)
+        game:init()
+        return
     end
-
 
     if REPEAT_KEYS[key] then
         repeat_keys[key] = 0

@@ -67,7 +67,7 @@ function Anim_Lineclear:_start(flags, game)
         local y = game.midclearlines[i]
 
         for x=1,TETRIS_BOARD_COUNT_W do
-            local particle = construct(Particles)
+            local particle = construct(Particle)
             particle:start(
                 TETRIS_BOARD_X + (TETRIS_PIECE_SIZE * (x-1)),
                 TETRIS_BOARD_Y + (TETRIS_PIECE_SIZE * (y-1))

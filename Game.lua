@@ -10,7 +10,7 @@ local drawPiece = require "drawPiece"
 ---@field bag RandomBag
 ---@field anim Anim | nil
 ---@field animflags AnimFlags
-Game = {
+local Game = {
     cGravity = F_GRAVITYDELAY,
     cLockdelay = F_LOCKDELAY,
     cLockMoveLimit = LOCKMOVELIMIT,
@@ -338,3 +338,5 @@ function Game:draw()
 
 
 end
+
+return Game

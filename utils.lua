@@ -32,9 +32,14 @@ function table.shallow_copy(t)
 end
 
 function table.print(t)
-  for k, v in pairs(t) do
-    print(k, v)
+  print("===")
+  print(t)
+  if t ~= nil then
+    for k, v in pairs(t) do
+      print(k, v)
+    end
   end
+  print("===")
 end
 
 function table.print2(t)
@@ -64,4 +69,9 @@ function math.mult_scalar(vec, scalar)
   local out = {}
   for i in pairs(vec) do out[i] = vec[i] * scalar end
   return out
+end
+
+function random(min, max)
+	local min, max = min or 0, max or 1
+	return (min > max and (love.math.random()*(min - max) + max)) or (love.math.random()*(max - min) + min)
 end
