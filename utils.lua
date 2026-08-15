@@ -17,6 +17,11 @@ function math.isinrange(x, a, b)
     return true
 end
 
+function math.lerp(s, e, f)
+	local p = 1-(f^dt)
+	return (s + p*(e - s))
+end
+
 function table.shallow_copy(t)
   local t2 = {}
   for k,v in pairs(t) do
@@ -53,4 +58,10 @@ end
 
 function bool2str(bool)
   if bool then return "true" else return "false" end
+end
+
+function math.mult_scalar(vec, scalar)
+  local out = {}
+  for i in pairs(vec) do out[i] = vec[i] * scalar end
+  return out
 end

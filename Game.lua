@@ -58,7 +58,7 @@ function Game:tick()
     else
 
         -- Play the animation
-        if self.anim:tick(self.animflags) then
+        if self.anim:tick(self.animflags, self) then
             self.anim = nil
         end
 
@@ -286,15 +286,16 @@ function Game:draw()
         lg.pop() -- End player
     end
 
-    self.board:drawOutline()
-
     -- todo make better
     local drawBoard = construct(Board)
     drawBoard:copyFrom(self.board)
 
     if self.midclearlines then
-        drawBoard:fillLines(self.midclearlines, self.animflags.midclearlines_col)
+        drawBoard:fillLines(self.midclearlines, nil)
     end
+
+    drawBoard:drawOutline()
+
 
     local spBoard = initSp("board", blockImg);
 
@@ -320,6 +321,10 @@ function Game:draw()
 
     lg.pop()
 
+    lg.push("all")
+    if self.anim then self.anim:draw(self) end
+    lg.pop()
+
     lg.push() -- Start debug draw
     lg.setColor(WHITE)
     lg.translate(170,10)
@@ -327,7 +332,7 @@ function Game:draw()
     lg.print(string.format("g:%d, l:%d", self.cGravity, self.cLockdelay), 0, 10)
     lg.print(string.format("bag:%d", #self.bag), 0, 20)
     if self.anim then
-    lg.print(string.format("anim:%s", self.anim.duration), 0, 30)
+    lg.print(string.format("anim:%s", self.anim._t), 0, 30)
     end
     lg.pop() -- End debug draw
 
