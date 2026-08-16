@@ -12,17 +12,18 @@ local pVY = 4
 local pLIFETIME = 5
 local pSTRIDE = 6
 
-function Particle:start(root_x, root_y)
+function Particle:start(root_x, root_y, col)
     self.root_x = root_x
     self.root_y = root_y
+    self.col = col
     self.alive = 0
 
-    for x=0,TETRIS_PIECE_SIZE/2-1,1 do
-        for y=0,TETRIS_PIECE_SIZE/2-1,1 do
+    for x=0,(TETRIS_PIECE_SIZE/2)-1,1 do
+        for y=0,(TETRIS_PIECE_SIZE/2)-1,1 do
 
-            local mid = TETRIS_PIECE_SIZE / 2
+            local mid = (TETRIS_PIECE_SIZE-1) / 2
 
-            self:emit(x*2 - mid,y*2 - mid)
+            self:emit(x*2 - mid, y*2 - mid)
         end
     end
 
@@ -118,13 +119,12 @@ function Particle:draw()
             end
 
             local col = {
-                WHITE[1], WHITE[2], WHITE[3], tint
+                self.col[1], self.col[2], self.col[3], tint
             }
 
             lg.setColor(col)
 
             lg.rectangle("fill", self[i+pX], self[i+pY], 2, 2)
-            --lg.circle("fill", self[i+pX], self[i+pY], 1)
         end
     end
     lg.pop()

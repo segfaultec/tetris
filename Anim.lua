@@ -4,7 +4,8 @@ local Particle = require "Particle"
 ---@class AnimFlags
 ---@field midclearlines_col table
 AnimFlags = {
-    drawplayer = true
+    drawplayer = true,
+    drawmidclearlines = true
 }
 function AnimFlags:construct(o)
     
@@ -52,6 +53,7 @@ local F_ANIM_LINECLEAR_DURATION = TICKRATE*1
 
 ---@class Anim_Lineclear: Anim
 ---@field particles Particles[]
+---@field start_callback function | nil
 Anim_Lineclear = {
     
 }
@@ -67,10 +69,12 @@ function Anim_Lineclear:_start(flags, game)
         local y = game.midclearlines[i]
 
         for x=1,TETRIS_BOARD_COUNT_W do
+            local col = game.board:get(x, y)
             local particle = construct(Particle)
             particle:start(
                 TETRIS_BOARD_X + (TETRIS_PIECE_SIZE * (x-1+.5)),
-                TETRIS_BOARD_Y + (TETRIS_PIECE_SIZE * (y-1+.5))
+                TETRIS_BOARD_Y + (TETRIS_PIECE_SIZE * (y-1+.5)),
+                col
             )
             table.insert(self.particles, particle)
         end
@@ -82,6 +86,7 @@ end
 ---@param game Game
 function Anim_Lineclear:_finish(flags, game)
     flags.drawplayer = true
+    flags.drawmidclearlines = true
 end
 
 ---@param flags AnimFlags
@@ -90,6 +95,12 @@ end
 function Anim_Lineclear:_tick(flags, t, game)
     if t == F_ANIM_LINECLEAR_END_B then
         return true
+    end
+
+    if t == F_ANIM_LINECLEAR_START then
+        flags.drawmidclearlines = false
+        flags.drawplayer = true
+        if self.start_callback ~= nil then self.start_callback() end
     end
 
     for i=1,#self.particles do

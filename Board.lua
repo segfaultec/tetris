@@ -8,6 +8,10 @@ function Board:empty()
     end
 end
 
+function Board:get(x, y)
+    return self[y][x]
+end
+
 function Board:setLine(y, value)
     if self[y] == nil then self[y] = {} end
     for x=1,TETRIS_BOARD_COUNT_W do

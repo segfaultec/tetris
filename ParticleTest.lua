@@ -14,7 +14,7 @@ function ParticleTest:init()
     self.anims = {}
 
     local particle = construct(Particles)
-    particle:start(0,0)
+    particle:start(0,0,WHITE)
     table.insert(self.anims, particle)
 
     for _, system in ipairs(self.systems) do
@@ -55,6 +55,8 @@ function ParticleTest:draw()
     lg.translate(50,50)
     for i=1,#self.anims do
         self.anims[i]:draw()
+        lg.setColor(RED)
+        lg.circle("fill",0,0,1)
         lg.translate(50, 0)
     end
     lg.pop()
@@ -67,6 +69,8 @@ function ParticleTest:draw()
             lg.setShader(data.shader)
 		    lg.draw(data.system, 0, 0)
 	    end
+        lg.setColor(RED)
+        lg.circle("fill",0,0,1)
         lg.translate(50, 0)
     end
     lg.pop()

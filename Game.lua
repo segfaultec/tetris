@@ -8,8 +8,10 @@ local drawPiece = require "drawPiece"
 ---@class Game
 ---@field board Board
 ---@field bag RandomBag
----@field anim Anim | nil
+---@field blocking_anim Anim | nil
+---@field free_anims Anim[]
 ---@field animflags AnimFlags
+---@field midclearlines number[] | nil
 local Game = {
     cGravity = F_GRAVITYDELAY,
     cLockdelay = F_LOCKDELAY,
@@ -26,10 +28,6 @@ local Game = {
     canHold = true,
 
     debugPause = false,
-
-    anim = nil,
-
-    midclearlines = nil
 }
 
 function Game:construct(o)
@@ -40,6 +38,8 @@ function Game:construct(o)
 
     o.bag = construct(RandomBag)
     o.animflags = construct(AnimFlags)
+
+    o.free_anims = {}
 end
 
 function Game:init()
@@ -50,7 +50,7 @@ function Game:tick()
 
     if self.debugPause then return end
 
-    if self.anim == nil then
+    if self.blocking_anim == nil then
 
         -- No animation: regular game tick
 
@@ -58,11 +58,17 @@ function Game:tick()
     else
 
         -- Play the animation
-        if self.anim:tick(self.animflags, self) then
-            self.anim = nil
+        if self.blocking_anim:tick(self.animflags, self) then
+            self.blocking_anim = nil
         end
 
-    end    
+    end
+
+    for i=#self.free_anims,1,-1 do
+        if self.free_anims[i]:tick(self.animflags, self) then
+            table.remove(self.free_anims, i)
+        end
+    end
 
 end
 
@@ -101,12 +107,12 @@ function Game:placePiece()
     local clears = self.board:checkLineClears()
     if #clears > 0 then
         self.midclearlines = clears
-        self.anim = construct(Anim_Lineclear)
-
-        self.anim.callback = function ()
+        local anim = construct(Anim_Lineclear)
+        anim.start_callback = function ()
             self.board:clearLines(self.midclearlines)
             self.midclearlines = nil
         end
+        table.insert(self.free_anims, anim)
     end
 
 end
@@ -290,7 +296,7 @@ function Game:draw()
     local drawBoard = construct(Board)
     drawBoard:copyFrom(self.board)
 
-    if self.midclearlines then
+    if self.midclearlines and not self.animflags.drawmidclearlines then
         drawBoard:fillLines(self.midclearlines, nil)
     end
 
@@ -321,9 +327,10 @@ function Game:draw()
 
     lg.pop()
 
-    lg.push("all")
-    if self.anim then self.anim:draw(self) end
-    lg.pop()
+    if self.blocking_anim then self.blocking_anim:draw(self) end
+    for i=1,#self.free_anims do
+        self.free_anims[i]:draw(self)
+    end
 
     lg.push() -- Start debug draw
     lg.setColor(WHITE)
@@ -331,8 +338,8 @@ function Game:draw()
     lg.print(string.format("id:%d r:%d", self.state.id, self.state.rot),0,0)
     lg.print(string.format("g:%d, l:%d", self.cGravity, self.cLockdelay), 0, 10)
     lg.print(string.format("bag:%d", #self.bag), 0, 20)
-    if self.anim then
-    lg.print(string.format("anim:%s", self.anim._t), 0, 30)
+    if self.blocking_anim then
+    lg.print(string.format("anim:%s", self.blocking_anim._t), 0, 30)
     end
     lg.pop() -- End debug draw
 
