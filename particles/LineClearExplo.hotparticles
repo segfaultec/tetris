@@ -1,0 +1,88 @@
+7
+
+:project
+bgColor 0 0 0.15
+bgChecker 0
+bgSize 8
+bgPath 0 !
+bgScale 1
+bgRepeat false false
+pixelateWorld true
+pixelateTextures false
+exportBaseDirectory 0 !
+exportParticles true
+exportParticlesOverwrite false
+exportParticlesTemplate 16 defaultLuaModule!
+exportParticlesTemplatePath 0 !
+exportParticlesPath 0 !
+exportTextures false
+exportTexturesOverwrite false
+exportTexturesDirectory 0 !
+exportClipboardTemplate 19 defaultLuaClipboard!
+exportClipboardTemplatePath 0 !
+scaleGlobalTimeEnabled true
+scaleGlobalTime 1
+scaleGlobalSpaceEnabled true
+scaleGlobalSpace 0.6340877914952
+scaleGlobalSizeEnabled true
+scaleGlobalSize 0.041495198902606
+zoom 7
+customData 0 !
+emitterPosition -11.932426932523 -15.291184143159
+movementScaleEnabled true true
+movement 0 1 1 1
+region true 0 0
+
+:system
+blendMode 3 add!
+colors 0 0 1 0 0 0 1 1 0 0 1 0.5 0 0 1 0
+customData 0 !
+directionEnabled true
+direction -1.5707963267949
+emissionRate 0
+emitterContinuous false
+emitterLifetime 0.29320569783185
+emitterOffsetEnabled true
+emitterOffset 0 0
+insertMode 3 top!
+kickStartEmitEnabled true
+kickStartEmit 166
+kickStartStepsEnabled true
+kickStartSteps 0
+linearDampingEnabled true
+linearDamping 2.2507119599057 2.1657871367473
+offset 0.5 0.5
+particleLifetime 0.69001418816156 0.7
+radialAccelerationEnabled true
+radialAcceleration 0 0
+relativeRotation true
+rotationEnabled true
+rotation -0.42019671360928 1.0636978224026
+scaleSizeEnabled true
+scaleSize 1
+scaleSpaceEnabled true
+scaleSpace 1
+scaleTimeEnabled true
+scaleTime 1
+shaderPath 0 !
+sizes 0.40961159358517
+sizeVariationEnabled true
+sizeVariation 0
+speedEnabled true
+speed 71.06329553226 37.746634139371
+spinEnabled true true
+spin 0 0
+spinVariationEnabled true
+spinVariation 0
+spreadEnabled true
+spread 6.2831853071796
+tangentialAccelerationEnabled true
+tangentialAcceleration 0 0
+texture 6 circle!
+texturePath 0 !
+title 0 !
+emissionAreaAngleEnabled true
+emissionAreaDeltaEnabled true true
+emissionArea 7 ellipse! 5 5 0 false
+linearAccelerationEnabled true true
+linearAcceleration -0.051036552378719 0 0 0

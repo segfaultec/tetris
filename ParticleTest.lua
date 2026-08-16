@@ -1,24 +1,46 @@
-local ParticleEmitter = require "ParticleEmitter"
+local Particles = require "Particle"
+local lineClearPs = require "particles.LineClearExplo"
 
 ---@class ParticleTest
----@field emitters ParticleEmitter[]
+---@field systems table[]
+---@field anims Particles[]
 local ParticleTest = {
 
 }
 
 function ParticleTest:init()
-    self.emitters = {}
+    
+    self.systems = {lineClearPs}
+    self.anims = {}
 
-    local particle = construct(ParticleEmitter)
-    particle:start(50,50)
-    table.insert(self.emitters, particle)
+    local particle = construct(Particles)
+    particle:start(0,0)
+    table.insert(self.anims, particle)
+
+    for _, system in ipairs(self.systems) do
+        for _, data in ipairs(system) do
+            data.system:reset()
+            data.system:start()
+            data.system:setPosition(system.x+data.x,system.y+data.y)
+            for i=1,data.kickStartSteps do
+                data.system:update(data.kickStartDt)
+            end
+            data.system:emit(data.emitAtStart)
+        end
+    end
 
 end
 
 function ParticleTest:tick()
 
-    for i=1,#self.emitters do
-        self.emitters[i]:update()
+    for i=1,#self.anims do
+        self.anims[i]:update()
+    end
+
+    for _, system in ipairs(self.systems) do
+        for _, data in ipairs(system) do
+            data.system:update(1/TICKRATE)
+        end
     end
 
 end
@@ -30,8 +52,22 @@ function ParticleTest:draw()
     lg.pop()
 
     lg.push("all")
-    for i=1,#self.emitters do
-        self.emitters[i]:draw()
+    lg.translate(50,50)
+    for i=1,#self.anims do
+        self.anims[i]:draw()
+        lg.translate(50, 0)
+    end
+    lg.pop()
+
+    lg.push("all")
+    lg.translate(50,100)
+    for _, system in ipairs(self.systems) do
+        for _, data in ipairs(system) do
+		    lg.setBlendMode(data.blendMode)
+            lg.setShader(data.shader)
+		    lg.draw(data.system, 0, 0)
+	    end
+        lg.translate(50, 0)
     end
     lg.pop()
 end

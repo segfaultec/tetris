@@ -17,9 +17,13 @@ function math.isinrange(x, a, b)
     return true
 end
 
-function math.lerp(s, e, f)
-	local p = 1-(f^dt)
-	return (s + p*(e - s))
+function math.lerp(a, b, t)
+  return a+t*(b-a)
+end
+
+function math.invlerp(a, b, x)
+  if (b-a)==0 then return 0 end
+  return (x-a)/(b-a)
 end
 
 function table.shallow_copy(t)

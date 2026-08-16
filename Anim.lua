@@ -1,5 +1,5 @@
 
-require "Particle"
+local Particle = require "Particle"
 
 ---@class AnimFlags
 ---@field midclearlines_col table
@@ -69,8 +69,8 @@ function Anim_Lineclear:_start(flags, game)
         for x=1,TETRIS_BOARD_COUNT_W do
             local particle = construct(Particle)
             particle:start(
-                TETRIS_BOARD_X + (TETRIS_PIECE_SIZE * (x-1)),
-                TETRIS_BOARD_Y + (TETRIS_PIECE_SIZE * (y-1))
+                TETRIS_BOARD_X + (TETRIS_PIECE_SIZE * (x-1+.5)),
+                TETRIS_BOARD_Y + (TETRIS_PIECE_SIZE * (y-1+.5))
             )
             table.insert(self.particles, particle)
         end
@@ -88,7 +88,7 @@ end
 ---@param game Game
 ---@return boolean Done
 function Anim_Lineclear:_tick(flags, t, game)
-    if t == F_ANIM_LINECLEAR_DURATION then
+    if t == F_ANIM_LINECLEAR_END_B then
         return true
     end
 

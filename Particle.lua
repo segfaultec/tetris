@@ -9,41 +9,32 @@ local pX = 1
 local pY = 2
 local pVX = 3
 local pVY = 4
-local pSTRIDE = 5
+local pLIFETIME = 5
+local pSTRIDE = 6
 
 function Particle:start(root_x, root_y)
     self.root_x = root_x
     self.root_y = root_y
     self.alive = 0
 
-    -- for x=0,TETRIS_PIECE_SIZE-1,2 do
-    --     for y=0,TETRIS_PIECE_SIZE-1,2 do
+    for x=0,TETRIS_PIECE_SIZE/2-1,1 do
+        for y=0,TETRIS_PIECE_SIZE/2-1,1 do
 
-    --         local vX,vY = vector.div(TETRIS_PIECE_SIZE,x,y)
-    --         vX,vY = vector.sub(.51,.51,vX,vY)
-    --         vX,vY = vector.normalize(vX,vY)
-    --         vX,vY = vector.mul(love.math.random(.10,.15),vX,vY)
+            local mid = TETRIS_PIECE_SIZE / 2
 
-    --         table.insert(self, love.math.random(
-    --             F_ANIM_LINECLEAR_DURATION-F_ANIM_LINECLEAR_PARTICLE_RANGE,
-    --             F_ANIM_LINECLEAR_DURATION
-    --         )) -- age
-    --         table.insert(self, x) -- x
-    --         table.insert(self, y) -- y
-    --         table.insert(self, vX) -- vx
-    --         table.insert(self, vY) -- vy
-    --     end
-    -- end
+            self:emit(x*2 - mid,y*2 - mid)
+        end
+    end
 
 end
 
-function Particle:emit()
+function Particle:emit(x, y)
 
     local index = 0
 
     -- Look for slot with a dead particle
     for i=1,#self,pSTRIDE do
-        if self[i+pAGE] == 0 then
+        if self[i+pAGE] == -1 then
             index = i
             break
         end
@@ -52,23 +43,22 @@ function Particle:emit()
     -- If we didn't find an open slot, add a new slot
     if index == 0 then
         index = #self+1
-        for i=1,pSTRIDE do
-            table.insert(self, index+i-1, 0)
+        for i=0,pSTRIDE-1 do
+            table.insert(self, index+i, 0)
         end
     end
 
     -- Set up the particle in the chosen slot
-    self[index+pAGE] = love.math.random(
-        F_ANIM_LINECLEAR_DURATION-F_ANIM_LINECLEAR_PARTICLE_RANGE,
-        F_ANIM_LINECLEAR_DURATION
-    )
 
-    local x = love.math.random(-2,1)*2 + .5
-    local y = love.math.random(-2,1)*2 + .5
+    self[index+pAGE] = 0
+    self[index+pLIFETIME] = love.math.random(
+        F_ANIM_LINECLEAR_END_A,
+        F_ANIM_LINECLEAR_END_B
+    )
 
     local angle,len = vector.toPolar(x,y)
 
-    local xn, yn = vector.fromPolar(random(angle-.5,angle+.5), len*.2)
+    local xn, yn = vector.fromPolar(random(angle-.5,angle+.5), len*.15)
 
     self[index+pX] = x
     self[index+pY] = y
@@ -88,17 +78,24 @@ end
 function Particle:update()
     self.alive = 0
     for i=1,#self,pSTRIDE do
-        if self[i+pAGE] > 0 then
+        if self[i+pAGE] >= 0 then
 
-            self[i+pAGE] = self[i+pAGE] - 1
+            self[i+pAGE] = self[i+pAGE] + 1
 
-            local drag = .955
-            self[i+pVX] = self[i+pVX] * drag
-            self[i+pVY] = self[i+pVY] * drag
+            if self[i+pAGE] > F_ANIM_LINECLEAR_START then
+                local drag = .955
+                self[i+pVX] = self[i+pVX] * drag
+                self[i+pVY] = self[i+pVY] * drag
 
-            self[i+pX] = self[i+pX] + self[i+pVX]
-            self[i+pY] = self[i+pY] + self[i+pVY]
+                self[i+pX] = self[i+pX] + self[i+pVX]
+                self[i+pY] = self[i+pY] + self[i+pVY]
+            end
+
             self.alive = self.alive + 1
+
+            if self[i+pAGE] >= self[i+pLIFETIME] then
+                self[i+pAGE] = -1
+            end
         end
     end
 end
@@ -110,9 +107,15 @@ function Particle:draw()
 
     for i=1,#self,pSTRIDE do
 
-        if self[i+pAGE] > 0 then
+        if self[i+pAGE] >= 0 then
 
-            local tint = (math.clamp(self[i+pAGE], 0, 15))/15
+            local tint
+            if self[i+pAGE] < F_ANIM_LINECLEAR_START then
+                tint = math.invlerp(0, F_ANIM_LINECLEAR_START, self[i+pAGE])
+            else
+                local remaining_age = self[i+pLIFETIME] - self[i+pAGE]
+                tint = (math.clamp(remaining_age, 0, 15))/15
+            end
 
             local col = {
                 WHITE[1], WHITE[2], WHITE[3], tint
@@ -121,6 +124,7 @@ function Particle:draw()
             lg.setColor(col)
 
             lg.rectangle("fill", self[i+pX], self[i+pY], 2, 2)
+            --lg.circle("fill", self[i+pX], self[i+pY], 1)
         end
     end
     lg.pop()
