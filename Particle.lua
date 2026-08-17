@@ -10,7 +10,8 @@ local pY = 2
 local pVX = 3
 local pVY = 4
 local pLIFETIME = 5
-local pSTRIDE = 6
+local pCOLORSHIFT = 6
+local pSTRIDE = 7
 
 function Particle:start(root_x, root_y, col)
     self.root_x = root_x
@@ -56,9 +57,9 @@ function Particle:emit(x, y)
         F_ANIM_LINECLEAR_END_A,
         F_ANIM_LINECLEAR_END_B
     )
+    self[index+pCOLORSHIFT] = random(-.05,.2)
 
-    local angle,len = vector.toPolar(x,y)
-
+    local angle,len = vector.toPolar(x+random(-.05,.05),y+random(-.05,.05))
     local xn, yn = vector.fromPolar(random(angle-.5,angle+.5), len*.15)
 
     self[index+pX] = x
@@ -112,14 +113,23 @@ function Particle:draw()
 
             local tint
             if self[i+pAGE] < F_ANIM_LINECLEAR_START then
-                tint = math.invlerp(0, F_ANIM_LINECLEAR_START, self[i+pAGE])
+                tint = math.clamp(
+                math.invlerp(0, F_ANIM_LINECLEAR_START, self[i+pAGE]),
+                0, 1)
             else
                 local remaining_age = self[i+pLIFETIME] - self[i+pAGE]
                 tint = (math.clamp(remaining_age, 0, 15))/15
             end
 
+            local colorshift = function (c)
+                return math.clamp(c+self[i+pCOLORSHIFT], 0,1)
+            end
+
             local col = {
-                self.col[1], self.col[2], self.col[3], tint
+                colorshift(self.col[1]),
+                colorshift(self.col[2]),
+                colorshift(self.col[3]),
+                tint
             }
 
             lg.setColor(col)

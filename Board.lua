@@ -98,13 +98,17 @@ function Board:isPieceValidSpot(state)
         for xo=1,bx do
             if bit.band(blocks[yo], bit.lshift(1, bx-xo)) ~= 0 then
                 if math.isinrange(x+xo-1, 1, TETRIS_BOARD_COUNT_W)
-                    and math.isinrange(y+yo-1, 1, TETRIS_BOARD_COUNT_H)
-                    and self[y+yo-1][x+xo-1] == nil then
+                                            -- hack board to have infinite collision above
+                    and math.isinrange(y+yo-1, -99, TETRIS_BOARD_COUNT_H) then
+                    if (y+yo-1) < 1 or self[y+yo-1][x+xo-1] == nil then
                         -- wow
                     else
                         -- placing pieces failed
                         return false
                     end
+                else
+                    return false
+                end
             end
         end
     end

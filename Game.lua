@@ -157,12 +157,6 @@ function Game:keypressed(key)
     elseif key == "e" then
         newstate = table.shallow_copy(self.state)
         newstate.rot = math.wrap(self.state.rot + 1, 1, ROT_MAX)
-    -- elseif key == "r" then
-    --     newstate = table.shallow_copy(self.state)
-    --     newstate.id = math.wrap(self.state.id - 1, 1, PIECES_MAX)
-    -- elseif key == "t" then
-    --     newstate = table.shallow_copy(self.state)
-    --     newstate.id = math.wrap(self.state.id + 1, 1, PIECES_MAX)
     elseif key == "a" then
         newstate = table.shallow_copy(self.state)
         newstate.x = self.state.x - 1
