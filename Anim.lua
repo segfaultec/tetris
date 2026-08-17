@@ -1,5 +1,5 @@
 
-local Particle = require "Particle"
+local LineClearParticle = require "particles.LineClearParticle"
 
 ---@class AnimFlags
 ---@field midclearlines_col table
@@ -52,7 +52,7 @@ function Anim:_draw(game) end
 local F_ANIM_LINECLEAR_DURATION = TICKRATE*1
 
 ---@class Anim_Lineclear: Anim
----@field particles Particles[]
+---@field particles LineClearParticle[]
 ---@field start_callback function | nil
 Anim_Lineclear = {
     
@@ -70,11 +70,11 @@ function Anim_Lineclear:_start(flags, game)
 
         for x=1,TETRIS_BOARD_COUNT_W do
             local col = game.board:get(x, y)
-            local particle = construct(Particle)
+            local particle = construct(LineClearParticle)
             particle:start(
                 TETRIS_BOARD_X + (TETRIS_PIECE_SIZE * (x-1+.5)),
                 TETRIS_BOARD_Y + (TETRIS_PIECE_SIZE * (y-1+.5)),
-                col
+                {col=col}
             )
             table.insert(self.particles, particle)
         end

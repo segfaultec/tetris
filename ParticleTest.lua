@@ -1,9 +1,9 @@
-local Particles = require "Particle"
-local lineClearPs = require "particles.LineClearExplo"
+local LineClearParticle = require "particles.LineClearParticle"
+local lineClearPs = require "particles.hot.LineClearExplo"
 
 ---@class ParticleTest
 ---@field systems table[]
----@field anims Particles[]
+---@field anims Particle[]
 local ParticleTest = {
 
 }
@@ -13,8 +13,8 @@ function ParticleTest:init()
     self.systems = {lineClearPs}
     self.anims = {}
 
-    local particle = construct(Particles)
-    particle:start(0,0,WHITE)
+    local particle = construct(LineClearParticle)
+    particle:start(0,0,{col=WHITE})
     table.insert(self.anims, particle)
 
     for _, system in ipairs(self.systems) do
