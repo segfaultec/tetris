@@ -17,6 +17,12 @@ function math.isinrange(x, a, b)
     return true
 end
 
+function math.sign(x)
+  if x > 0 then return 1 end
+  if x < 0 then return -1 end
+  return 0
+end
+
 function math.lerp(a, b, t)
   return a+t*(b-a)
 end

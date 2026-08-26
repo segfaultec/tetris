@@ -1,5 +1,6 @@
 
 local LineClearParticle = require "particles.LineClearParticle"
+local HardDropParticle  = require "particles.HardDropParticle"
 
 ---@class AnimFlags
 ---@field midclearlines_col table
@@ -49,7 +50,67 @@ function Anim:_tick(flags, t, game) return true end
 function Anim:_finish(flags, game) end
 function Anim:_draw(game) end
 
-local F_ANIM_LINECLEAR_DURATION = TICKRATE*1
+---@class Anim_Harddrop: Anim
+---@field particle HardDropParticle
+Anim_Harddrop = {
+    x = 0,
+    y = 0,
+    w = 0,
+    finished = false
+}
+setmetatable(Anim_Harddrop, {__index=Anim})
+
+function Anim_Harddrop:_start(flags, game)
+
+    local piece = PIECES[self.state.id]
+    if piece ~= nil then
+        local rotation = piece.rotations[self.state.rot]
+
+        local baseY = nil
+        for iy=piece.bounds[2],1,-1 do
+            if rotation[iy] ~= 0 then
+                baseY = iy
+                break
+            end
+        end
+
+        local xL, xR = nil, nil
+        if baseY ~= nil then
+            for ix=1,piece.bounds[1] do
+                if bit.band(rotation[baseY], bit.lshift(1, piece.bounds[1]-ix)) ~= 0 then
+                    if xL == nil then xL = ix-1 end
+                    xR = ix-1
+                end
+            end
+        end
+
+        local x = self.state.x +((xR-xL)*.5)+(xL)+(.5)
+        local y = self.state.y+baseY
+        local w = (xR-xL+1)
+
+        self.particle = construct(HardDropParticle)
+        self.particle:start(
+            TETRIS_BOARD_X + ((x-1) * TETRIS_PIECE_SIZE),
+            TETRIS_BOARD_Y + ((y-1) * TETRIS_PIECE_SIZE),
+            {w=TETRIS_PIECE_SIZE*w*.5}
+        )
+
+    end
+end
+
+function Anim_Harddrop:_tick(flags, t, game)
+    self.particle:update()
+
+    return t > 30
+end
+
+function Anim_Harddrop:_draw(game)
+    self.particle:draw()
+end
+
+function Anim_Harddrop:_finish(flags, game)
+
+end
 
 ---@class Anim_Lineclear: Anim
 ---@field particles LineClearParticle[]

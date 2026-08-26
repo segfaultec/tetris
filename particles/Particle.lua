@@ -35,7 +35,7 @@ function Particle:update()
     end
 end
 
-function Particle:emit(...)
+function Particle:emit(args)
     local index = 0
 
     -- Look for slot with a dead particle
@@ -57,9 +57,10 @@ function Particle:emit(...)
     -- Set up the particle in the chosen slot
 
     self[index+self.pAGE] = 0
-    self[index+self.pLIFETIME] = 60 -- placeholder lifetime, should be overridden by child
+     -- placeholder lifetime, should be overridden by child
+    self[index+self.pLIFETIME] = 60
 
-    self:impl_start(index, ...)
+    self:impl_start(index, args)
 end
 
 function Particle:draw()

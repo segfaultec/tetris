@@ -94,7 +94,15 @@ function Game:getHarddropState()
 end
 
 function Game:harddrop()
-    self.state = self:getHarddropState()
+    local harddropstate = self:getHarddropState()
+
+    if harddropstate.y > self.state.y then
+        local anim = construct(Anim_Harddrop, {state = table.shallow_copy(harddropstate)})
+        table.insert(self.free_anims, anim)
+    end
+
+    self.state = harddropstate
+
     self:placePiece()
 end
 

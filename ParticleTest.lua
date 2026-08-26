@@ -1,5 +1,6 @@
 local LineClearParticle = require "particles.LineClearParticle"
 local lineClearPs = require "particles.hot.LineClearExplo"
+local HardDropParticle = require "particles.HardDropParticle"
 
 ---@class ParticleTest
 ---@field systems table[]
@@ -15,6 +16,10 @@ function ParticleTest:init()
 
     local particle = construct(LineClearParticle)
     particle:start(0,0,{col=WHITE})
+    table.insert(self.anims, particle)
+
+    particle = construct(HardDropParticle)
+    particle:start(0,0,{w=5})
     table.insert(self.anims, particle)
 
     for _, system in ipairs(self.systems) do

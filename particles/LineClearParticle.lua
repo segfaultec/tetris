@@ -3,16 +3,15 @@ local vector = require "lib.hump.vector-light"
 
 ---@class LineClearParticle : Particle
 local LineClearParticle = {
-    pX = 2,
-    pY = 3,
-    pVX = 4,
-    pVY = 5,
-    pCOLORSHIFT = 6,
-    pSTRIDE = 7,
+    pX = Particle.pSTRIDE,
+    pY = Particle.pSTRIDE+1,
+    pVX = Particle.pSTRIDE+2,
+    pVY = Particle.pSTRIDE+3,
+    pCOLORSHIFT = Particle.pSTRIDE+4,
+    pSTRIDE = Particle.pSTRIDE+5,
 
     col = nil
 }
-
 setmetatable(LineClearParticle, {__index = Particle})
 
 function LineClearParticle:impl_startsystem(args)
