@@ -1,6 +1,8 @@
 local easing = require "lib.easing"
 
 ---@class LevelMeter
+---@field cols_queue table
+---@field cols_active table
 local LevelMeter = {
     t = 0,
     start = 0,
@@ -10,15 +12,24 @@ local LevelMeter = {
 }
 
 function LevelMeter:init(init_fill)
-    if init_fill < 0.01 then init_fill = -.2 end
+    --if init_fill < 0.01 then init_fill = -.2 end
 
     self.start, self.current, self.target = init_fill, init_fill, init_fill
+    self.cols_queue = {}
+    self.cols_active = {}
+end
+
+function LevelMeter:queueColours(cols)
+    self.cols_queue = {}
+    for i=1,#cols do
+        table.insert(self.cols_queue, cols[i])
+    end
 end
 
 FILL_ANIM_TIME = 90
 
 function LevelMeter:setFill(new_fill)
-    if new_fill < 0.01 then new_fill = -.2 end
+    --if new_fill < 0.01 then new_fill = -.1 end
 
     self.start = self.current
     self.target = new_fill
@@ -39,52 +50,58 @@ end
 
 function LevelMeter:draw()
 
+    local rng = love.math.newRandomGenerator()
+
     lg.push("all")
 
     local WIDTH = TETRIS_BOARD_W+EDGEWIDTH_X+EDGEWIDTH_X
-    local HEIGHT = TETRIS_BOARD_H+EDGEWIDTH_Y
+    local HEIGHT = TETRIS_BOARD_H+EDGEWIDTH_Y+3
 
     local X_START = TETRIS_BOARD_X - EDGEWIDTH_X
-    local Y_START = TETRIS_BOARD_Y
+    local Y_START = TETRIS_BOARD_Y + TETRIS_BOARD_H + 13
 
-    local Y_FILL = TETRIS_BOARD_Y + (TETRIS_BOARD_H * (1-self.current))
+    local Y_FILL = Y_START - (HEIGHT * (self.current)) + 1
 
-    lg.setScissor(X_START, Y_START, WIDTH, HEIGHT)
+    lg.setScissor(X_START, TETRIS_BOARD_Y, WIDTH, HEIGHT)
 
-    local cols = {}
+    local col_index = 1
 
-    for i=1,PIECES_MAX do
-        local col = table.shallow_copy(PIECES[i].colour)
-        local tint = .8
-        col[1] = col[1] * tint
-        col[2] = col[2] * tint
-        col[3] = col[3] * tint
-        table.insert(cols, col)
-    end
+    for y=Y_START,Y_FILL,-2 do
+        for x=X_START,X_START+WIDTH-1,2 do
+        
+            local offset = sin((self.t+(x*4)) * 0.02)*1.7
 
-    local a = 1
-    local b = 1
+            while col_index > #self.cols_active and #self.cols_queue > 0 do
+                local col = table.shallow_copy(self.cols_queue[love.math.random(#self.cols_queue)])
+                local TINT = random(.6,.9)
+                col[1] = col[1] * TINT
+                col[2] = col[2] * TINT
+                col[3] = col[3] * TINT
+                table.insert(self.cols_active, col)
+            end
 
-    local wave = easing.outQuart(self.fill_t, 3.5, 3.5-1.7, FILL_ANIM_TIME)
-
-    for x=X_START-20,X_START+WIDTH+10,2 do
-
-        local offset = sin((self.t+(x*4)) * 0.02)*1.7
-        b = a
-
-        for y=Y_FILL,Y_START+HEIGHT+10,2 do
-            local col = cols[b+1]
-
+            local col = nil
+            if col_index <= #self.cols_active then
+                -- Reverse index so oldest cols are at the top
+                col = self.cols_active[#self.cols_active-col_index+1]
+            else
+                col = WHITE
+            end
             lg.setColor(col)
 
             lg.rectangle("fill",x,y+offset,2,2)
 
-            b = (b + 1) % #cols
+            col_index = col_index + 1
         end
-        a = (a + 1) % #cols
+    end
+
+    while #self.cols_active > col_index do
+        self.cols_active[#self.cols_active] = nil
     end
 
     lg.pop()
+
+    lg.print(#self.cols_active, 50, 50)
 
 end
 

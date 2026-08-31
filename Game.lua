@@ -153,18 +153,25 @@ function Game:placePiece()
         end
         table.insert(self.free_anims, anim)
 
+        local cleared_cols = {}
+        for i=1,#clears do
+            for _=1,9 do self.board:appendLineColours(cleared_cols, clears[i]) end
+        end
+
         self:addScore(BASE_LINE_SCORES[#clears])
-        self:addClearedLines(#clears)
+        self:addClearedLines(#clears, cleared_cols)
     end
 
 end
 
-function Game:addClearedLines(line_count)
+function Game:addClearedLines(line_count, cleared_cols)
     self.lines = self.lines + line_count
     if self.lines >= LEVEL_CLEAR_LINES then
         self.level = self.level + 1
         self.lines = 0
     end
+    table.shuffle(cleared_cols)
+    self.levelmeter:queueColours(cleared_cols)
     self.levelmeter:setFill(self.lines / LEVEL_CLEAR_LINES)
 end
 
@@ -409,7 +416,7 @@ function Game:draw()
     -- if self.blocking_anim then
     -- lg.print(string.format("anim:%s", self.blocking_anim._t), 0, 30)
     -- end
-    lg.print(string.format("lv:%d\nln:%d/%d", self.level, self.lines, LEVEL_CLEAR_LINES))
+    lg.print(string.format("lv:%d", self.level, self.lines, LEVEL_CLEAR_LINES))
     lg.pop() -- End debug draw
 
     if self.gameover then

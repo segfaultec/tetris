@@ -59,6 +59,13 @@ function table.print2(t)
   end
 end
 
+function table.shuffle(t)
+  for i=#t,2,-1 do
+    local j = love.math.random(i)
+    t[i], t[j] = t[j], t[i]
+  end
+end
+
 ---@generic T
 ---@param class T
 ---@param obj T | nil
@@ -81,9 +88,12 @@ function math.mult_scalar(vec, scalar)
   return out
 end
 
-function random(min, max)
+function random(min, max, rng)
 	local min, max = min or 0, max or 1
-	return (min > max and (love.math.random()*(min - max) + max)) or (love.math.random()*(max - min) + min)
+  local a, b = 0, 0
+  if rng then a, b = rng:random(), rng:random()
+  else a, b = love.math.random(), love.math.random() end
+	return (min > max and (a*(min - max) + max)) or (b*(max - min) + min)
 end
 
 function partrect(x, y, w, h, hidden)

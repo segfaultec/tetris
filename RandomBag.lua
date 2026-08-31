@@ -16,14 +16,11 @@ function RandomBag:_regenerate()
         self[i] = i
     end
 
-    for i=PIECES_MAX,2,-1 do
-        local j = love.math.random(i)
-        self[i], self[j] = self[j], self[i]
-    end
+    table.shuffle(self)
 
-    str = ""
-    for i=1,PIECES_MAX do
-        str = str..self[i]
-    end
-    print(str)
+    -- str = ""
+    -- for i=1,PIECES_MAX do
+    --     str = str..self[i]
+    -- end
+    -- print(str)
 end

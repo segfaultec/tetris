@@ -40,6 +40,12 @@ function Board:drawToSp(spBlocks)
     end
 end
 
+function Board:appendLineColours(out_array, y)
+    for tileX=1,TETRIS_BOARD_COUNT_W do
+        table.insert(out_array, self[y][tileX])
+    end
+end
+
 function Board:drawOutline()
 
     lg.push("all")
