@@ -38,7 +38,7 @@ function Scoreboard:draw()
     lg.push("all")
 
     lg.setColor(BLACK)
-    lg.rectangle("line", 0, 1, WIDTH, EDGEWIDTH_Y)
+    partrect(0, 1, WIDTH, EDGEWIDTH_Y,{up=true})
 
     local text = string.format("%d", self.current)
     local textwidth = CHAR_WIDTH*string.len(text)

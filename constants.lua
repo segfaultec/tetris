@@ -37,6 +37,7 @@ BLACK  = {0, 0, 0}
 WHITE  = {1, 1, 1}
 RED    = {1, 0, 0}
 BLUE   = {0, 0, 1}
+GREEN  = {0, 1, 0}
 ORANGE = {1, 0.45, 0}
 GOLD   = {1, 0.6, 0.1}
 GRAY   = {0.5, 0.5, 0.5}
@@ -44,9 +45,13 @@ GRAY_DARK = {.2,.2,.2}
 
 TICKRATE = 60
 
-F_GRAVITYDELAY = 24
-F_LOCKDELAY = 10 + F_GRAVITYDELAY
+--F_GRAVITYDELAY = 24
+F_LOCKDELAY = 30
 LOCKMOVELIMIT = 15
+
+LV_GRAV = {
+    60,48,37,28,21,16,11,8,6,4,3,2,1
+}
 
 REPEAT_KEYS = {["a"]=true, ["d"]=true, ["s"]=true}
 REPEAT_KEYS_CLASHES = {["a"]="d", ["d"]="a"}
@@ -58,5 +63,8 @@ F_ANIM_LINECLEAR_END_A = 70
 F_ANIM_LINECLEAR_END_B = 90
 
 BASE_LINE_SCORES = {100,300,500,800}
+
+START_LEVEL = 4
+LEVEL_CLEAR_LINES = 10
 
 require "constants_pieces"

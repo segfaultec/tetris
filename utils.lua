@@ -85,3 +85,11 @@ function random(min, max)
 	local min, max = min or 0, max or 1
 	return (min > max and (love.math.random()*(min - max) + max)) or (love.math.random()*(max - min) + min)
 end
+
+function partrect(x, y, w, h, hidden)
+  if not hidden then hidden = {} end
+  if not hidden.up    then lg.line(x-1,  y,x+w,  y) end
+  if not hidden.right then lg.line(x+w,y-1,x+w,y+h) end
+  if not hidden.down  then lg.line(x+w,y+h,x-1,y+h) end
+  if not hidden.left  then lg.line(x  ,y+h,  x,y-1) end
+end

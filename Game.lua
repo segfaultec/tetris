@@ -2,6 +2,7 @@
 require "Board"
 require "RandomBag"
 require "Anim"
+local LevelMeter = require "LevelMeter"
 
 local drawPiece = require "drawPiece"
 local Scoreboard = require "Scoreboard"
@@ -14,8 +15,9 @@ local Scoreboard = require "Scoreboard"
 ---@field animflags AnimFlags
 ---@field midclearlines number[] | nil
 ---@field scoreboard Scoreboard
+---@field levelmeter LevelMeter
 local Game = {
-    cGravity = F_GRAVITYDELAY,
+    cGravity = 30,
     cLockdelay = F_LOCKDELAY,
     cLockMoveLimit = LOCKMOVELIMIT,
 
@@ -31,7 +33,10 @@ local Game = {
 
     debugPause = false,
 
-    score = 0
+    score = 0,
+    lines = 0,
+    startlevel = START_LEVEL,
+    level = START_LEVEL,
 }
 
 function Game:construct(o)
@@ -46,6 +51,9 @@ function Game:construct(o)
     o.free_anims = {}
 
     o.scoreboard = construct(Scoreboard)
+    o.levelmeter = construct(LevelMeter)
+
+    o.level = o.startlevel
 end
 
 function Game:init()
@@ -53,6 +61,8 @@ function Game:init()
 
     self.score = 0
     self.scoreboard:init(self.score)
+
+    self.levelmeter:init(0)
 end
 
 function Game:tick()
@@ -80,6 +90,7 @@ function Game:tick()
     end
 
     self.scoreboard:tick()
+    self.levelmeter:tick()
 
 end
 
@@ -128,14 +139,26 @@ function Game:placePiece()
         self.midclearlines = clears
         local anim = construct(Anim_Lineclear)
         anim.start_callback = function ()
-            self.board:clearLines(self.midclearlines)
+            if self.midclearlines then
+                self.board:clearLines(self.midclearlines)
+            end
             self.midclearlines = nil
         end
         table.insert(self.free_anims, anim)
 
         self:addScore(BASE_LINE_SCORES[#clears])
+        self:addClearedLines(#clears)
     end
 
+end
+
+function Game:addClearedLines(line_count)
+    self.lines = self.lines + line_count
+    if self.lines > LEVEL_CLEAR_LINES then
+        self.level = self.level + 1
+        self.lines = 0
+    end
+    self.levelmeter:setFill(self.lines / LEVEL_CLEAR_LINES)
 end
 
 function Game:addScore(score)
@@ -147,13 +170,16 @@ function Game:gravity()
     local newstate = table.shallow_copy(self.state)
     newstate.y = self.state.y + 1
 
+    local grav = LV_GRAV[self.level]
+    if grav == nil then grav = 1 end
+
     if self:tryMovePiece(self.state, newstate) then
 
         self.cLockdelay = F_LOCKDELAY
 
         
         if (self.cGravity == 0) then
-            self.cGravity = F_MOVEDOWN
+            self.cGravity = grav
 
             -- Apply movedown
             self.state = newstate
@@ -161,7 +187,7 @@ function Game:gravity()
             self.cGravity = self.cGravity - 1
         end
     else
-        self.cGravity = F_GRAVITYDELAY
+        self.cGravity = grav
 
         if (self.cLockdelay == 0) then
             self.cLockdelay = F_LOCKDELAY
@@ -172,6 +198,8 @@ function Game:gravity()
         end
     end
 end
+
+flip = false
 
 function Game:keypressed(key)
 
@@ -211,7 +239,8 @@ function Game:keypressed(key)
     elseif key == "p" then
         self.debugPause = not self.debugPause
     elseif key == "o" then
-        self:addScore(1000)
+        self.level = self.level + 1
+        flip = not flip
     end
 
     if newstate ~= nil and self:tryMovePiece(self.state, newstate) then
@@ -279,14 +308,21 @@ local drawPieceBox = require "drawPieceBox"
 
 function Game:draw()
 
-    lg.push("all") -- Start board
-
+    lg.push("all") -- Start bg
     lg.setColor(GRAY_DARK)
     lg.rectangle("fill", 0, 0, GAME_WIDTH, GAME_HEIGHT)
+    lg.pop() -- End bg
 
+    lg.push("all") -- Draw level meters
+    self.levelmeter:draw()
+    lg.setColor(BLACK)
+    partrect(TETRIS_BOARD_X - EDGEWIDTH_X, TETRIS_BOARD_Y, EDGEWIDTH_X, TETRIS_BOARD_H+1,{down=true})
+    partrect(TETRIS_BOARD_X + TETRIS_BOARD_W+1, TETRIS_BOARD_Y, EDGEWIDTH_X, TETRIS_BOARD_H+1,{down=true})
+    lg.pop()
+
+    lg.push("all") -- Start board
     lg.setColor(GRAY)
     lg.rectangle("fill", TETRIS_BOARD_X, TETRIS_BOARD_Y, TETRIS_BOARD_W, TETRIS_BOARD_H)
-
     lg.pop() -- End board
 
     lg.push("all") -- Start board
@@ -353,14 +389,6 @@ function Game:draw()
 
     lg.pop()
 
-    lg.push("all") -- Draw level meters
-
-    lg.setColor(BLACK)
-    lg.rectangle("line", TETRIS_BOARD_X - EDGEWIDTH_X, TETRIS_BOARD_Y, EDGEWIDTH_X, TETRIS_BOARD_H+1)
-    lg.rectangle("line", TETRIS_BOARD_X + TETRIS_BOARD_W+1, TETRIS_BOARD_Y, EDGEWIDTH_X, TETRIS_BOARD_H+1)
-
-    lg.pop()
-
     if self.blocking_anim then self.blocking_anim:draw(self) end
     for i=1,#self.free_anims do
         self.free_anims[i]:draw(self)
@@ -375,6 +403,7 @@ function Game:draw()
     -- if self.blocking_anim then
     -- lg.print(string.format("anim:%s", self.blocking_anim._t), 0, 30)
     -- end
+    lg.print(string.format("lv:%d\nln:%d/%d", self.level, self.lines, LEVEL_CLEAR_LINES))
     lg.pop() -- End debug draw
 
 
