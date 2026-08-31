@@ -37,6 +37,8 @@ local Game = {
     lines = 0,
     startlevel = START_LEVEL,
     level = START_LEVEL,
+
+    gameover = false
 }
 
 function Game:construct(o)
@@ -68,6 +70,7 @@ end
 function Game:tick()
 
     if self.debugPause then return end
+    if self.gameover then return end
 
     if self.blocking_anim == nil then
 
@@ -99,6 +102,10 @@ function Game:resetPlayer(newpid)
     self.state.y = 0
     self.state.id = newpid
     self.state.rot = 1
+
+    if not self.board:isPieceValidSpot(self.state) then
+        self.gameover = true
+    end
 end
 
 function Game:getHarddropState()
@@ -154,7 +161,7 @@ end
 
 function Game:addClearedLines(line_count)
     self.lines = self.lines + line_count
-    if self.lines > LEVEL_CLEAR_LINES then
+    if self.lines >= LEVEL_CLEAR_LINES then
         self.level = self.level + 1
         self.lines = 0
     end
@@ -176,7 +183,6 @@ function Game:gravity()
     if self:tryMovePiece(self.state, newstate) then
 
         self.cLockdelay = F_LOCKDELAY
-
         
         if (self.cGravity == 0) then
             self.cGravity = grav
@@ -328,7 +334,7 @@ function Game:draw()
     lg.push("all") -- Start board
     lg.translate(TETRIS_BOARD_X, TETRIS_BOARD_Y)
 
-    if self.animflags.drawplayer then
+    if self.animflags.drawplayer and not self.gameover then
 
         lg.push("transform") -- Start harddrop
         local harddrop = self:getHarddropState()
@@ -406,6 +412,20 @@ function Game:draw()
     lg.print(string.format("lv:%d\nln:%d/%d", self.level, self.lines, LEVEL_CLEAR_LINES))
     lg.pop() -- End debug draw
 
+    if self.gameover then
+        lg.push("all")
+        local text = "game over :("
+        local width = lg.getFont():getWidth(text)
+        local x = TETRIS_BOARD_X + ((TETRIS_BOARD_W - width) / 2)
+        local y = TETRIS_BOARD_Y + (TETRIS_BOARD_H / 2)
+
+        lg.setColor(BLACK)
+        lg.print(text, x+1, y+1)
+        lg.setColor(WHITE)
+        lg.print(text, x, y)
+
+        lg.pop()
+    end
 
 end
 
