@@ -34,6 +34,10 @@ function love.load()
 
     Default_font = lg.newFont("fonts/NESCyrillic.ttf", 16)
 
+    for i=1,9 do
+        print(Default_font:getWidth(i))
+    end
+
     game = construct(Game)
     game:init()
 
@@ -100,13 +104,6 @@ function love.draw()
     lg.setFont(Default_font)
 
     game:draw()
-
-    local o = 100
-    for k in pairs(repeat_keys) do
-        lg.print(string.format("%s %d", k, repeat_keys[k]), 10, o)
-
-        o = o + 10
-    end
 
     push:finish()
 end

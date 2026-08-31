@@ -4,6 +4,7 @@ require "RandomBag"
 require "Anim"
 
 local drawPiece = require "drawPiece"
+local Scoreboard = require "Scoreboard"
 
 ---@class Game
 ---@field board Board
@@ -12,6 +13,7 @@ local drawPiece = require "drawPiece"
 ---@field free_anims Anim[]
 ---@field animflags AnimFlags
 ---@field midclearlines number[] | nil
+---@field scoreboard Scoreboard
 local Game = {
     cGravity = F_GRAVITYDELAY,
     cLockdelay = F_LOCKDELAY,
@@ -28,6 +30,8 @@ local Game = {
     canHold = true,
 
     debugPause = false,
+
+    score = 0
 }
 
 function Game:construct(o)
@@ -40,10 +44,15 @@ function Game:construct(o)
     o.animflags = construct(AnimFlags)
 
     o.free_anims = {}
+
+    o.scoreboard = construct(Scoreboard)
 end
 
 function Game:init()
     self:resetPlayer(self.bag:consume())
+
+    self.score = 0
+    self.scoreboard:init(self.score)
 end
 
 function Game:tick()
@@ -69,6 +78,8 @@ function Game:tick()
             table.remove(self.free_anims, i)
         end
     end
+
+    self.scoreboard:tick()
 
 end
 
@@ -121,8 +132,15 @@ function Game:placePiece()
             self.midclearlines = nil
         end
         table.insert(self.free_anims, anim)
+
+        self:addScore(BASE_LINE_SCORES[#clears])
     end
 
+end
+
+function Game:addScore(score)
+    self.score = self.score + score
+    self.scoreboard:setScore(self.score)
 end
 
 function Game:gravity()
@@ -192,6 +210,8 @@ function Game:keypressed(key)
         return
     elseif key == "p" then
         self.debugPause = not self.debugPause
+    elseif key == "o" then
+        self:addScore(1000)
     end
 
     if newstate ~= nil and self:tryMovePiece(self.state, newstate) then
@@ -304,7 +324,6 @@ function Game:draw()
 
     drawBoard:drawOutline()
 
-
     local spBoard = initSp("board", blockImg);
 
     drawBoard:drawToSp(spBoard)
@@ -322,6 +341,11 @@ function Game:draw()
     drawPieceBox(self.hold, "HOLD", initSp("hold", blockImg), tint)
     lg.pop() -- End next&hold
 
+    lg.push("all") -- Start scoreboard
+    lg.translate(TETRIS_BOARD_X, TETRIS_BOARD_Y + TETRIS_BOARD_H)
+    self.scoreboard:draw()
+    lg.pop() -- End scoreboard
+
     lg.push("all") -- Start board border
 
     lg.setColor(BLACK)
@@ -337,12 +361,12 @@ function Game:draw()
     lg.push() -- Start debug draw
     lg.setColor(WHITE)
     lg.translate(170,10)
-    lg.print(string.format("id:%d r:%d", self.state.id, self.state.rot),0,0)
-    lg.print(string.format("g:%d, l:%d", self.cGravity, self.cLockdelay), 0, 10)
-    lg.print(string.format("bag:%d", #self.bag), 0, 20)
-    if self.blocking_anim then
-    lg.print(string.format("anim:%s", self.blocking_anim._t), 0, 30)
-    end
+    -- lg.print(string.format("id:%d r:%d", self.state.id, self.state.rot),0,0)
+    -- lg.print(string.format("g:%d, l:%d", self.cGravity, self.cLockdelay), 0, 10)
+    -- lg.print(string.format("bag:%d", #self.bag), 0, 20)
+    -- if self.blocking_anim then
+    -- lg.print(string.format("anim:%s", self.blocking_anim._t), 0, 30)
+    -- end
     lg.pop() -- End debug draw
 
 
