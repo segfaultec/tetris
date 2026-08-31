@@ -33,11 +33,7 @@ function love.load()
     lw.setPosition(desktopW / 2 - windowWidth / 2, desktopH / 2 - windowHeight / 2, displayIndex)
 
     Default_font = lg.newFont("fonts/NESCyrillic.ttf", 16)
-
-    for i=1,9 do
-        print(Default_font:getWidth(i))
-    end
-
+    
     game = construct(Game)
     game:init()
 

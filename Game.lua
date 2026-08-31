@@ -342,7 +342,7 @@ function Game:draw()
     lg.pop() -- End next&hold
 
     lg.push("all") -- Start scoreboard
-    lg.translate(TETRIS_BOARD_X, TETRIS_BOARD_Y + TETRIS_BOARD_H)
+    lg.translate(TETRIS_BOARD_X-EDGEWIDTH_X, TETRIS_BOARD_Y + TETRIS_BOARD_H)
     self.scoreboard:draw()
     lg.pop() -- End scoreboard
 
@@ -350,6 +350,14 @@ function Game:draw()
 
     lg.setColor(BLACK)
     lg.rectangle("line", TETRIS_BOARD_X, TETRIS_BOARD_Y, TETRIS_BOARD_W+1, TETRIS_BOARD_H+1)
+
+    lg.pop()
+
+    lg.push("all") -- Draw level meters
+
+    lg.setColor(BLACK)
+    lg.rectangle("line", TETRIS_BOARD_X - EDGEWIDTH_X, TETRIS_BOARD_Y, EDGEWIDTH_X, TETRIS_BOARD_H+1)
+    lg.rectangle("line", TETRIS_BOARD_X + TETRIS_BOARD_W+1, TETRIS_BOARD_Y, EDGEWIDTH_X, TETRIS_BOARD_H+1)
 
     lg.pop()
 
