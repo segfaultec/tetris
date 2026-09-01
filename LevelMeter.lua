@@ -50,8 +50,6 @@ end
 
 function LevelMeter:draw()
 
-    local rng = love.math.newRandomGenerator()
-
     lg.push("all")
 
     local WIDTH = TETRIS_BOARD_W+EDGEWIDTH_X+EDGEWIDTH_X
@@ -62,7 +60,12 @@ function LevelMeter:draw()
 
     local Y_FILL = Y_START - (HEIGHT * (self.current)) + 1
 
-    lg.setScissor(X_START, TETRIS_BOARD_Y, WIDTH, HEIGHT)
+    lg.setScissor(
+        TETRIS_BOARD_X - EDGEWIDTH_X,
+        TETRIS_BOARD_Y,
+        TETRIS_BOARD_W + EDGEWIDTH_X + EDGEWIDTH_X,
+        TETRIS_BOARD_H + EDGEWIDTH_Y
+    )
 
     local col_index = 1
 
