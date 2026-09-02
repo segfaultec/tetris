@@ -350,7 +350,7 @@ function Game:draw()
         if harddrop.y == 0 then
             playerClip = {u=2}
         end
-        drawPiece(harddrop.id, harddrop.rot, initSp("harddrop", blockImg), .5, playerClip)
+        drawPiece(harddrop.id, harddrop.rot, initSp("harddrop", iBlock), .5, playerClip)
         lg.pop() -- End harddrop
 
         lg.push("transform") -- Start player
@@ -359,7 +359,7 @@ function Game:draw()
         if self.state.y == 0 then
             playerClip = {u=2}
         end
-        drawPiece(self.state.id, self.state.rot, initSp("player", blockImg), 1, playerClip)
+        drawPiece(self.state.id, self.state.rot, initSp("player", iBlock), 1, playerClip)
         lg.pop() -- End player
     end
 
@@ -373,7 +373,7 @@ function Game:draw()
 
     drawBoard:drawOutline()
 
-    local spBoard = initSp("board", blockImg);
+    local spBoard = initSp("board", iBlock);
 
     drawBoard:drawToSp(spBoard)
 
@@ -383,11 +383,11 @@ function Game:draw()
 
     lg.push("all") -- Start next&hold
     lg.translate(10,10)
-    drawPieceBox(self.bag:peek(), "NEXT", initSp("next", blockImg), 1)
+    drawPieceBox(self.bag:peek(), "NEXT", initSp("next", iBlock), 1)
     lg.translate(33,0)
     local tint = 1
     if not self.canHold then tint = .5 end
-    drawPieceBox(self.hold, "HOLD", initSp("hold", blockImg), tint)
+    drawPieceBox(self.hold, "HOLD", initSp("hold", iBlock), tint)
     lg.pop() -- End next&hold
 
     lg.push("all") -- Start scoreboard
@@ -399,6 +399,31 @@ function Game:draw()
 
     lg.setColor(BLACK)
     lg.rectangle("line", TETRIS_BOARD_X, TETRIS_BOARD_Y, TETRIS_BOARD_W+1, TETRIS_BOARD_H+1)
+
+    lg.pop()
+
+    lg.push("all")
+
+    lg.setColor(BLACK)
+
+    local width = TETRIS_BOARD_W + ((EDGEWIDTH_X+1)*2)
+    lg.translate(TETRIS_BOARD_X - EDGEWIDTH_X - 1, TETRIS_BOARD_Y - 8)
+    lg.rectangle("fill", 0, 0, width, 8)
+    lg.translate(width / 2 - 8*8/2, 0)
+
+    for i=1,8 do
+        local x = 8*(i-1)
+        if self.level-8 >= i then
+            lg.setColor(YELLOW)
+            lg.draw(iLevelLampOn, x, 0)
+        elseif self.level >= i then
+            lg.setColor(RED)
+            lg.draw(iLevelLampOn, x, 0)
+        else
+            lg.setColor(WHITE)
+            lg.draw(iLevelLampOff, x, 0)
+        end
+    end
 
     lg.pop()
 
@@ -416,7 +441,7 @@ function Game:draw()
     -- if self.blocking_anim then
     -- lg.print(string.format("anim:%s", self.blocking_anim._t), 0, 30)
     -- end
-    lg.print(string.format("lv:%d", self.level, self.lines, LEVEL_CLEAR_LINES))
+    --lg.print(string.format("lv:%d", self.level, self.lines, LEVEL_CLEAR_LINES))
     lg.pop() -- End debug draw
 
     if self.gameover then

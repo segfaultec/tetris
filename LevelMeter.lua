@@ -104,8 +104,6 @@ function LevelMeter:draw()
 
     lg.pop()
 
-    lg.print(#self.cols_active, 50, 50)
-
 end
 
 return LevelMeter
