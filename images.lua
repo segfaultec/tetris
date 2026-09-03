@@ -1,3 +1,5 @@
+local loadAsepriteQuads = require "loadAsepriteQuads"
+
 iBlock = lg.newImage("img/block6x6.png")
 iLevelLampOff = lg.newImage("img/levellampoff.png")
 iLevelLampOn = lg.newImage("img/levellampon.png")
@@ -9,3 +11,6 @@ qLevelLampInner_On = lg.newQuad(0, 0, 10, 16, iLevelLampInner)
 qLevelLampInner_Off = lg.newQuad(10, 0, 10, 16, iLevelLampInner)
 
 iBgTile = lg.newImage("img/bgtile.png")
+
+iScoreLcd = lg.newImage("img/scorelcd.png")
+qtScoreLcd = loadAsepriteQuads("img/scorelcd.json", iScoreLcd)

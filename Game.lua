@@ -3,6 +3,7 @@ require "Board"
 require "RandomBag"
 require "Anim"
 local LevelMeter = require "LevelMeter"
+local ScoreLcd   = require "ScoreLcd"
 
 local drawPiece = require "drawPiece"
 local Scoreboard = require "Scoreboard"
@@ -16,6 +17,7 @@ local Scoreboard = require "Scoreboard"
 ---@field midclearlines number[] | nil
 ---@field scoreboard Scoreboard
 ---@field levelmeter LevelMeter
+---@field scorelcd ScoreLcd
 local Game = {
     cGravity = 30,
     cLockdelay = F_LOCKDELAY,
@@ -58,6 +60,8 @@ function Game:construct(o)
     o.levelmeter = construct(LevelMeter)
 
     o.level = o.startlevel
+
+    o.scorelcd = construct(ScoreLcd)
 end
 
 function Game:init()
@@ -67,6 +71,7 @@ function Game:init()
     self.scoreboard:init(self.score)
 
     self.levelmeter:init(0)
+    self.scorelcd:init()
 end
 
 function Game:tick()
@@ -96,6 +101,7 @@ function Game:tick()
 
     self.scoreboard:tick()
     self.levelmeter:tick()
+    self.scorelcd:tick()
 
 end
 
@@ -421,6 +427,14 @@ function Game:draw()
     lg.translate(TETRIS_BOARD_X-EDGEWIDTH_X, TETRIS_BOARD_Y + TETRIS_BOARD_H)
     self.scoreboard:draw()
     lg.pop() -- End scoreboard
+
+    lg.push("all")
+    lg.translate(
+        TETRIS_BOARD_X + TETRIS_BOARD_W + EDGEWIDTH_X + 4,
+        TETRIS_BOARD_Y + 90
+    )
+    self.scorelcd:draw()
+    lg.pop()
 
     lg.push("all") -- Start board border
 

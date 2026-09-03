@@ -1,6 +1,5 @@
 require "constants"
 require "utils"
-require "images"
 
 local push = require "lib.push"
 local Timer = require "lib.hump.timer"
@@ -10,6 +9,8 @@ local ParticleTest = require "ParticleTest"
 game = nil
 
 function love.load()
+
+    require "images"
 
     lw.setTitle("Tetris")
     lg.setDefaultFilter("nearest", "nearest", 0)
