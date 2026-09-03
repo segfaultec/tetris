@@ -41,6 +41,7 @@ local Game = {
     level = START_LEVEL,
 
     lastClearWasDifficult = false,
+    combo = 0,
 
     gameover = false
 }
@@ -171,12 +172,17 @@ function Game:placePiece()
             score = score * B2B_MULTI
         end
 
+        score = score + ((self.combo-1) * 50 * self.level)
+
         self:addScore(score)
         self:addClearedLines(#clears, cleared_cols)
+        self:setCombo(self.combo + 1)
 
         if #clears == 4 then
             self.lastClearWasDifficult = true
         end
+    else
+        self:setCombo(0)
     end
 
 end
@@ -197,6 +203,11 @@ function Game:levelUp()
 
     table.insert(self.free_anims, construct(Anim_LevelUp))
     self.levelmeter:setFill(0)
+end
+
+function Game:setCombo(new_combo)
+    self.combo = new_combo
+    self.scorelcd:setCombo(self.combo)
 end
 
 function Game:addScore(score)
@@ -235,8 +246,6 @@ function Game:gravity()
         end
     end
 end
-
-flip = false
 
 function Game:keypressed(key)
 
@@ -277,7 +286,6 @@ function Game:keypressed(key)
         self.debugPause = not self.debugPause
     elseif key == "o" then
         self:levelUp()
-        flip = not flip
     end
 
     if newstate ~= nil and self:tryMovePiece(self.state, newstate) then
