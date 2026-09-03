@@ -38,6 +38,8 @@ local Game = {
     startlevel = START_LEVEL,
     level = START_LEVEL,
 
+    lastClearWasDifficult = false,
+
     gameover = false
 }
 
@@ -158,8 +160,17 @@ function Game:placePiece()
             for _=1,9 do self.board:appendLineColours(cleared_cols, clears[i]) end
         end
 
-        self:addScore(BASE_LINE_SCORES[#clears]*self.level)
+        local score = BASE_LINE_SCORES[#clears]*self.level
+        if self.lastClearWasDifficult then
+            score = score * B2B_MULTI
+        end
+
+        self:addScore(score)
         self:addClearedLines(#clears, cleared_cols)
+
+        if #clears == 4 then
+            self.lastClearWasDifficult = true
+        end
     end
 
 end
