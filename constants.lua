@@ -37,6 +37,7 @@ BLACK  = {0, 0, 0}
 WHITE  = {1, 1, 1}
 RED    = {1, 0, 0}
 BLUE   = {0, 0, 1}
+CYAN   = {0, 1, 1}
 GREEN  = {0, 1, 0}
 ORANGE = {1, 0.45, 0}
 GOLD   = {1, 0.6, 0.1}
@@ -67,5 +68,9 @@ BASE_LINE_SCORES = {100,300,500,800}
 
 START_LEVEL = 4
 LEVEL_CLEAR_LINES = 10
+
+F_ANIM_LEVELUP_STEP = 5
+F_ANIM_LEVELUP_LEN = F_ANIM_LEVELUP_STEP * 7 * 3
+
 
 require "constants_pieces"

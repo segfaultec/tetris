@@ -6,7 +6,8 @@ local HardDropParticle  = require "particles.HardDropParticle"
 ---@field midclearlines_col table
 AnimFlags = {
     drawplayer = true,
-    drawmidclearlines = true
+    drawmidclearlines = true,
+    lampanimstep = 0,
 }
 function AnimFlags:construct(o)
     
@@ -49,6 +50,8 @@ function Anim:_start(flags, game) end
 function Anim:_tick(flags, t, game) return true end
 function Anim:_finish(flags, game) end
 function Anim:_draw(game) end
+
+
 
 ---@class Anim_Harddrop: Anim
 ---@field particle HardDropParticle
@@ -115,9 +118,7 @@ end
 ---@class Anim_Lineclear: Anim
 ---@field particles LineClearParticle[]
 ---@field start_callback function | nil
-Anim_Lineclear = {
-    
-}
+Anim_Lineclear = {}
 setmetatable(Anim_Lineclear, {__index=Anim})
 
 ---@param flags AnimFlags
@@ -151,6 +152,7 @@ function Anim_Lineclear:_finish(flags, game)
 end
 
 ---@param flags AnimFlags
+---@param t number
 ---@param game Game
 ---@return boolean Done
 function Anim_Lineclear:_tick(flags, t, game)
@@ -180,3 +182,36 @@ function Anim_Lineclear:_draw(game)
     end
 
 end
+
+---@class Anim_LevelUp: Anim
+Anim_LevelUp = {}
+setmetatable(Anim_LevelUp, {__index=Anim})
+
+---@param flags AnimFlags
+---@param game Game
+function Anim_LevelUp:_start(flags, game)
+    flags.lampanimstep = 1
+end
+
+---@param flags AnimFlags
+---@param game Game
+function Anim_LevelUp:_finish(flags, game)
+    flags.lampanimstep = 0
+end
+
+---@param flags AnimFlags
+---@param t number
+---@param game Game
+---@return boolean Done
+function Anim_LevelUp:_tick(flags, t, game)
+    if t == F_ANIM_LEVELUP_LEN then return true end
+
+    flags.lampanimstep = t + 1
+
+    return false
+end
+
+---@param game Game
+function Anim_LevelUp:_draw(game)
+end
+

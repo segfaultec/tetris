@@ -158,7 +158,7 @@ function Game:placePiece()
             for _=1,9 do self.board:appendLineColours(cleared_cols, clears[i]) end
         end
 
-        self:addScore(BASE_LINE_SCORES[#clears])
+        self:addScore(BASE_LINE_SCORES[#clears]*self.level)
         self:addClearedLines(#clears, cleared_cols)
     end
 
@@ -167,12 +167,19 @@ end
 function Game:addClearedLines(line_count, cleared_cols)
     self.lines = self.lines + line_count
     if self.lines >= LEVEL_CLEAR_LINES then
-        self.level = self.level + 1
-        self.lines = 0
+        self:levelUp()
     end
     table.shuffle(cleared_cols)
     self.levelmeter:queueColours(cleared_cols)
     self.levelmeter:setFill(self.lines / LEVEL_CLEAR_LINES)
+end
+
+function Game:levelUp()
+    self.level = self.level + 1
+    self.lines = 0
+
+    table.insert(self.free_anims, construct(Anim_LevelUp))
+    self.levelmeter:setFill(0)
 end
 
 function Game:addScore(score)
@@ -252,7 +259,7 @@ function Game:keypressed(key)
     elseif key == "p" then
         self.debugPause = not self.debugPause
     elseif key == "o" then
-        self.level = self.level + 1
+        self:levelUp()
         flip = not flip
     end
 
@@ -334,8 +341,17 @@ function Game:draw()
     lg.pop()
 
     lg.push("all") -- Start board
+    --lg.setColor(GRAY)
+    --lg.rectangle("fill", TETRIS_BOARD_X, TETRIS_BOARD_Y, TETRIS_BOARD_W, TETRIS_BOARD_H)
     lg.setColor(GRAY)
-    lg.rectangle("fill", TETRIS_BOARD_X, TETRIS_BOARD_Y, TETRIS_BOARD_W, TETRIS_BOARD_H)
+    local bgSp = initSp("bgtile", iBgTile)
+    lg.translate(TETRIS_BOARD_X, TETRIS_BOARD_Y)
+    for x=0,TETRIS_BOARD_W-1,15 do
+        for y=0,TETRIS_BOARD_H-1,15 do
+            bgSp:add(x, y)
+        end
+    end
+    lg.draw(bgSp, 0, 0)
     lg.pop() -- End board
 
     lg.push("all") -- Start board
@@ -350,7 +366,7 @@ function Game:draw()
         if harddrop.y == 0 then
             playerClip = {u=2}
         end
-        drawPiece(harddrop.id, harddrop.rot, initSp("harddrop", iBlock), .5, playerClip)
+        drawPiece(harddrop.id, harddrop.rot, initSp("harddrop", iBlock), .6, playerClip)
         lg.pop() -- End harddrop
 
         lg.push("transform") -- Start player
@@ -406,23 +422,46 @@ function Game:draw()
 
     lg.setColor(BLACK)
 
-    local width = TETRIS_BOARD_W + ((EDGEWIDTH_X+1)*2)
-    lg.translate(TETRIS_BOARD_X - EDGEWIDTH_X - 1, TETRIS_BOARD_Y - 8)
-    lg.rectangle("fill", 0, 0, width, 8)
-    lg.translate(width / 2 - 8*8/2, 0)
+    lg.translate(TETRIS_BOARD_X + TETRIS_BOARD_W + EDGEWIDTH_X + 16 + 1, TETRIS_BOARD_Y)
+    lg.rotate(PI/2)
+    
+    for i=1,6 do
+        local x = (10+1)*(i-1)
 
-    for i=1,8 do
-        local x = 8*(i-1)
-        if self.level-8 >= i then
-            lg.setColor(YELLOW)
-            lg.draw(iLevelLampOn, x, 0)
-        elseif self.level >= i then
-            lg.setColor(RED)
-            lg.draw(iLevelLampOn, x, 0)
-        else
-            lg.setColor(WHITE)
-            lg.draw(iLevelLampOff, x, 0)
+        local anim_active = self.animflags.lampanimstep > 0
+        local anim_on = false
+        if anim_active then
+            local t = floor(self.animflags.lampanimstep / F_ANIM_LEVELUP_STEP) % 7
+            anim_on = t >= i
         end
+
+        if anim_on then
+            if anim_on then
+                lg.setColor(WHITE)
+                lg.draw(iLevelLampInner, qLevelLampInner_On, x, 0)
+            else
+                lg.setColor(WHITE)
+                lg.draw(iLevelLampInner, qLevelLampInner_Off, x, 0)
+            end
+        else
+            if self.level-12 >= i then
+                lg.setColor(GREEN)
+                lg.draw(iLevelLampInner, qLevelLampInner_On, x, 0)
+            elseif self.level-6 >= i then
+                lg.setColor(CYAN)
+                lg.draw(iLevelLampInner, qLevelLampInner_On, x, 0)
+            elseif self.level >= i then
+                lg.setColor(RED)
+                lg.draw(iLevelLampInner, qLevelLampInner_On, x, 0)
+            else
+                lg.setColor(WHITE)
+                lg.draw(iLevelLampInner, qLevelLampInner_Off, x, 0)
+            end
+
+        end
+
+        lg.setColor(WHITE)
+        lg.draw(iLevelLampFrame, x, 0)
     end
 
     lg.pop()

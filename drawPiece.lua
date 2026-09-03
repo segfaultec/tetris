@@ -17,9 +17,7 @@ local function drawPiece(pid, rot, sp, tint, cliprect)
     if piece == nil then return end
 
     local colour = table.shallow_copy(piece.colour)
-    for i=1,#colour do
-        colour[i] = colour[i] * tint
-    end
+    colour[4] = tint
 
     -- Draw the piece
     for offy=1,piece.bounds[2] do

@@ -74,7 +74,7 @@ function LineClearParticle:impl_draw(index)
         colorshift(self.col[1]),
         colorshift(self.col[2]),
         colorshift(self.col[3]),
-        tint
+        math.clamp(tint-.25,0,1)
     }
 
     lg.setColor(col)

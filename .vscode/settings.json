@@ -7,5 +7,7 @@
     "Lua.diagnostics.disable": [
         "lowercase-global",
         "undefined-global"
-    ]
+    ],
+    "editor.suggest.showSnippets": true,
+    "editor.snippetSuggestions": "top"
 }
