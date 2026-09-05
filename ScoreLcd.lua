@@ -106,7 +106,7 @@ end
 function ScoreLcd:tick(game)
     self.t = self.t + 1
 
-    if self.combo ~= game.combo and new_combo == 0 then
+    if self.combo ~= game.combo and game.combo == 0 then
         self.comboShowZero = 16
     end
 
