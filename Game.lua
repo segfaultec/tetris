@@ -77,6 +77,8 @@ end
 
 function Game:tick()
 
+    self.scorelcd:tick(self)
+
     if self.debugPause then return end
     if self.gameover then return end
 
@@ -102,7 +104,6 @@ function Game:tick()
 
     self.scoreboard:tick()
     self.levelmeter:tick()
-    self.scorelcd:tick()
 
 end
 
@@ -167,9 +168,12 @@ function Game:placePiece()
             for _=1,9 do self.board:appendLineColours(cleared_cols, clears[i]) end
         end
 
+        local isDifficult = #clears == 4 -- todo and tspin
+
         local score = BASE_LINE_SCORES[#clears]*self.level
-        if self.lastClearWasDifficult then
+        if isDifficult and self.lastClearWasDifficult then
             score = score * B2B_MULTI
+            self.scorelcd:runevent("backtoback", 120)
         end
 
         score = score + ((self.combo-1) * 50 * self.level)
@@ -178,9 +182,17 @@ function Game:placePiece()
         self:addClearedLines(#clears, cleared_cols)
         self:setCombo(self.combo + 1)
 
-        if #clears == 4 then
-            self.lastClearWasDifficult = true
+        if #clears == 1 then
+            self.scorelcd:runevent("single", 60)
+        elseif #clears == 2 then
+            self.scorelcd:runevent("double", 60)
+        elseif #clears == 3 then
+            self.scorelcd:runevent("triple", 60)
+        elseif #clears == 4 then
+            self.scorelcd:runevent("tetris", 120)
         end
+
+        self.lastClearWasDifficult = isDifficult
     else
         self:setCombo(0)
     end
@@ -207,7 +219,6 @@ end
 
 function Game:setCombo(new_combo)
     self.combo = new_combo
-    self.scorelcd:setCombo(self.combo)
 end
 
 function Game:addScore(score)

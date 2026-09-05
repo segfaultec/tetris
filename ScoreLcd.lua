@@ -1,15 +1,66 @@
 
+local ON = 1
+local FLASH = 2
+
+local Events = {
+    single = {
+        clear = ON,
+        clear_s = ON,
+        clear_dot = ON
+    },
+    double = {
+        clear = ON,
+        clear_d = ON,
+        clear_dot = ON
+    },
+    triple = {
+        clear = ON,
+        clear_t = ON,
+        clear_dot = ON
+    },
+    tetris = {
+        clear = FLASH,
+        tet_l = ON,
+        tet_c = ON,
+        tet_r = ON,
+        tet_b = ON,
+        tetris_t = FLASH,
+        tetris_e = FLASH,
+        tetris_t2 = FLASH,
+        tetris_r = FLASH,
+        tetris_i = FLASH,
+        tetris_s = FLASH
+    },
+    backtoback = {
+        lcd_b2b = FLASH
+    }
+}
+
 ---@class ScoreLcd
 ---@field lamps table
+---@field events table
 local ScoreLcd = {
     t=0,
 
     comboShowZero = 0,
-    combo = 0
+    combo = 0,
+    dead = false
 }
 
 function ScoreLcd:init()
     self.lamps = {}
+    self.events = {}
+end
+
+function ScoreLcd:runevent(event, duration)
+
+    local event = Events[event]
+    if event == nil then return end
+
+    local event_inst = {duration=duration, event=event}
+
+    self.events[event] = event_inst
+
 end
 
 function ScoreLcd:setDigitFlags(prefix, digit)
@@ -50,30 +101,56 @@ function ScoreLcd:setDigitFlags(prefix, digit)
 
 end
 
-function ScoreLcd:setCombo(new_combo)
 
-    if self.combo ~= new_combo and new_combo == 0 then
+---@param game Game
+function ScoreLcd:tick(game)
+    self.t = self.t + 1
+
+    if self.combo ~= game.combo and new_combo == 0 then
         self.comboShowZero = 16
     end
 
-    self.combo = math.clamp(new_combo, 0, 99)
+    self.combo = math.clamp(game.combo, 0, 99)
+    self.dead = game.gameover
 
-end
-
-function ScoreLcd:tick()
-    self.t = self.t + 1
+    self.lamps = {}
 
     local showZero = self.comboShowZero > 0 and self.comboShowZero % 2 == 0
-
-    if self.combo == 0 and not showZero then
-        self:setDigitFlags("combo1", nil)
-        self:setDigitFlags("combo2", nil)
-    else
+    if self.combo > 0 or showZero then
         local digit10 = floor(self.combo / 10)
         local digit1 = floor(self.combo % 10)
 
         self:setDigitFlags("combo1", digit10)
         self:setDigitFlags("combo2", digit1)
+    end
+
+    for eventk,inst in pairs(self.events) do
+        if inst.duration > 0 then
+            for lampk,value in pairs(inst.event) do
+                if lampk ~= "duration" then
+
+                    local on = false
+
+                    if value == ON then
+                        on = true
+                    elseif value == FLASH then
+                        on = self.t % 4 >= 2
+                    end
+
+                    if on then
+                        self.lamps[lampk] = true
+                    end
+                end
+            end
+
+            inst.duration = inst.duration - 1
+        else
+            self.events[eventk] = nil
+        end
+    end
+
+    if self.dead then
+        self.lamps["skull"] = true
     end
 
     if self.comboShowZero > 0 then
@@ -99,7 +176,11 @@ function ScoreLcd:draw()
 
     for lamp,value in pairs(self.lamps) do
         if value then
-            self.drawLcd(qtScoreLcd[lamp])
+            if qtScoreLcd[lamp] ~= nil then
+                self.drawLcd(qtScoreLcd[lamp])
+            else
+                print(lamp)
+            end
         end
     end
     
