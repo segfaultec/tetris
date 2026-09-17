@@ -168,6 +168,13 @@ PIECES = {
     }
 }
 
+function CheckPieceBit(id, rot, x, y)
+    local piece = PIECES[id]
+    local blocks = piece.rotations[rot]
+    local bx = piece.bounds[1]
+    return bit.band(blocks[y], bit.lshift(1, bx-x)) ~= 0
+end
+
 PIECES_MAX = 7
 ROT_MAX = 4
 
@@ -201,3 +208,5 @@ KICKS_I = {
     ["L0"] = {{-1, 0}, {-1,-1}, { 0, 2}, {-1, 2}},
     ["0L"] = {{ 1, 0}, { 1, 1}, { 0,-2}, { 1,-2}}
 }
+
+T_MINO_ID = 3

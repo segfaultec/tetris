@@ -75,7 +75,6 @@ function Board:addPlayerPiece(state, tint)
 
     local piece = PIECES[state.id]
     local bx, by = piece.bounds[1], piece.bounds[2]
-    local blocks = piece.rotations[state.rot]
 
     local colour = table.shallow_copy(piece.colour)
     for i=1,#colour do
@@ -84,7 +83,7 @@ function Board:addPlayerPiece(state, tint)
 
     for yo=1,by do
         for xo=1,bx do
-            if bit.band(blocks[yo], bit.lshift(1, bx-xo)) ~= 0
+            if CheckPieceBit(state.id, state.rot, xo, yo)
                 and math.isinrange(x+xo-1, 1, TETRIS_BOARD_COUNT_W)
                 and math.isinrange(y+yo-1, 1, TETRIS_BOARD_COUNT_H) then
                 self[y+yo-1][x+xo-1] = colour
@@ -102,7 +101,7 @@ function Board:isPieceValidSpot(state)
 
     for yo=1,by do
         for xo=1,bx do
-            if bit.band(blocks[yo], bit.lshift(1, bx-xo)) ~= 0 then
+            if CheckPieceBit(state.id, state.rot, xo, yo) then
                 if math.isinrange(x+xo-1, 1, TETRIS_BOARD_COUNT_W)
                                             -- hack board to have infinite collision above
                     and math.isinrange(y+yo-1, -99, TETRIS_BOARD_COUNT_H) then

@@ -29,6 +29,7 @@ local Game = {
         id = 3,
         rot = 1,
     },
+    state_beforemove = {},
 
     hold = 0,
     canHold = true,
@@ -113,6 +114,8 @@ function Game:resetPlayer(newpid)
     self.state.id = newpid
     self.state.rot = 1
 
+    self.state_beforemove = table.shallow_copy(self.state)
+
     if not self.board:isPieceValidSpot(self.state) then
         self.gameover = true
     end
@@ -132,22 +135,68 @@ function Game:getHarddropState()
     end
 end
 
+function Game:setState(new_state)
+    self.state_beforemove = table.shallow_copy(self.state)
+    self.state = table.shallow_copy(new_state)
+end
+
 function Game:harddrop()
     local harddropstate = self:getHarddropState()
 
     if harddropstate.y > self.state.y then
         local anim = construct(Anim_Harddrop, {state = table.shallow_copy(harddropstate)})
         table.insert(self.free_anims, anim)
+
+        -- Only harddrop if we moved downwards
+        -- This is so the old state is not updated,
+        -- to still allow tspins after a non-moving harddrop
+        self:setState(harddropstate)
     end
 
-    self.state = harddropstate
-
+    -- Place the piece immediately, no matter if the piece actually moved
     self:placePiece()
+end
+
+---@param state table
+---@return nil|"mini"|"full" tspin
+function Game:checkTSpin(state, old_state)
+
+    -- Can only tspin if the last move was a rotation
+    if state.rot == old_state.rot then
+        print("no rot")
+        return nil
+    end
+
+    -- Can only tspin with a t
+    if state.id ~= T_MINO_ID then
+        print("no T")
+        return nil
+    end
+
+    local back_dx, back_dy = 0, 0
+    
+    local dxs = {0,1,0,-1}
+    local dys = {-1,0,1,0}
+    for i=1,4 do
+        local dx, dy = dxs[i], dys[i]
+        if not CheckPieceBit(T_MINO_ID, state.rot, 2+dx, 2+dy) then
+            back_dx, back_dy = dx, dy
+            break
+        end
+    end
+
+    local back_occupied = 0
+
+    
+
+    local front_occupied = 0
+
+
+
 end
 
 function Game:placePiece()
     self.board:addPlayerPiece(self.state, 1)
-    self:resetPlayer(self.bag:consume())
 
     self.canHold = true
 
@@ -168,7 +217,9 @@ function Game:placePiece()
             for _=1,9 do self.board:appendLineColours(cleared_cols, clears[i]) end
         end
 
-        local isDifficult = #clears == 4 -- todo and tspin
+        local tspin = self:checkTSpin(self.state, self.state_beforemove)
+
+        local isDifficult = #clears == 4 or (tspin ~= nil and #clears > 0)
 
         local score = BASE_LINE_SCORES[#clears]*self.level
         if isDifficult and self.lastClearWasDifficult then
@@ -196,6 +247,8 @@ function Game:placePiece()
     else
         self:setCombo(0)
     end
+
+    self:resetPlayer(self.bag:consume())
 
 end
 
@@ -241,7 +294,7 @@ function Game:gravity()
             self.cGravity = grav
 
             -- Apply movedown
-            self.state = newstate
+            self:setState(newstate)
         else
             self.cGravity = self.cGravity - 1
         end
@@ -301,7 +354,8 @@ function Game:keypressed(key)
 
     if newstate ~= nil and self:tryMovePiece(self.state, newstate) then
         self.cLockdelay = F_LOCKDELAY
-        self.state = newstate
+
+        self:setState(newstate)
     end
 end
 

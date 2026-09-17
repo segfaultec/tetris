@@ -5,8 +5,6 @@ function loadAsepriteQuads(filename, image)
     local data, _ = lf.read(filename)
     data = json.decode(data)
 
-    print(#data.meta.layers)
-
     local out_layers = {}
 
     for i,layer_data in ipairs(data.meta.layers) do
