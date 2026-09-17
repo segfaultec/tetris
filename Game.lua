@@ -2,6 +2,7 @@
 require "Board"
 require "RandomBag"
 require "Anim"
+
 local LevelMeter = require "LevelMeter"
 local ScoreLcd   = require "ScoreLcd"
 
@@ -200,6 +201,8 @@ function Game:placePiece()
 
     self.canHold = true
 
+    sHit:play()
+
     local clears = self.board:checkLineClears()
     if #clears > 0 then
         self.midclearlines = clears
@@ -244,6 +247,8 @@ function Game:placePiece()
         end
 
         self.lastClearWasDifficult = isDifficult
+
+        sPowerUp:play()
     else
         self:setCombo(0)
     end

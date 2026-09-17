@@ -11,6 +11,7 @@ game = nil
 function love.load()
 
     require "images"
+    require "sounds"
 
     lw.setTitle("Tetris")
     lg.setDefaultFilter("nearest", "nearest", 0)
